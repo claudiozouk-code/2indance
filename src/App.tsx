@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { motion, useScroll, useTransform } from "motion/react";
+import { motion, useScroll, useTransform, useSpring } from "motion/react";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import About from "./components/About";
@@ -18,23 +18,31 @@ interface ScrollSectionProps {
 
 function ScrollSection({ children, zIndex, effect, className = "" }: ScrollSectionProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const anchorRef = useRef<HTMLDivElement>(null);
 
   // Track scroll progress of this container.
   // - Starts at 0 when the bottom of this container enters the bottom of the viewport (meaning the user has scrolled all the way to the bottom and read everything!).
   // - Ends at 1 when the bottom of this container leaves the top of the viewport.
   // This perfectly preserves the reading limit of each page so no bottom content is cut off!
+  // We track `anchorRef` which is a static layout div with NO transforms, completely preventing feedback loop flickers!
   const { scrollYProgress } = useScroll({
-    target: containerRef,
+    target: anchorRef,
     offset: ["end end", "end start"]
   });
 
+  // Smooth out the raw scroll progress using a highly responsive spring.
+  // This dampens mousewheel ticks and trackpad momentum, creating a premium fluid motion without any trembling!
+  const smoothProgress = useSpring(scrollYProgress, {
+    damping: 35,
+    stiffness: 220,
+    mass: 0.15,
+    restDelta: 0.0001
+  });
+
   // Keep the current section completely fixed (stationary) relative to the viewport
-  // by translating it down by exactly the scroll distance (100vh) as the scrollbar moves.
-  // This lets the subsequent section (with a higher z-index) roll up and overlay it beautifully!
-  const yParallax = useTransform(scrollYProgress, [0, 1], ["0px", "100vh"]);
-  
-  // Smoothly dim the pinned section to enhance visual focus on the overlapping active section on top
-  const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.4]);
+  // by translating it down by exactly the scroll distance ("100%") as the scrollbar moves.
+  // Using percentage-based transforms is hardware-accelerated and avoids costly layout calculations!
+  const yParallax = useTransform(smoothProgress, [0, 1], ["0%", "100%"]);
 
   let initial = {};
   let whileInView = {};
@@ -77,10 +85,12 @@ function ScrollSection({ children, zIndex, effect, className = "" }: ScrollSecti
       style={{ zIndex }}
       className={`relative ${effect === "hero" ? "mt-0" : "mt-[-3.5rem] md:mt-[-5.5rem]"}`}
     >
+      {/* Invisible anchor element that remains static in layout flow to prevent scrolling feedback loops */}
+      <div ref={anchorRef} className="absolute inset-0 pointer-events-none" />
+
       <motion.div
         style={{ 
           y: yParallax, 
-          opacity, 
         }}
         className={`w-full overflow-hidden ${
           effect === "hero" 
@@ -91,11 +101,11 @@ function ScrollSection({ children, zIndex, effect, className = "" }: ScrollSecti
         <motion.div
           initial={initial}
           whileInView={whileInView}
-          viewport={{ once: false, amount: 0.08 }}
+          viewport={{ once: true, amount: 0.05 }}
           transition={{ 
-            duration: 1.0, 
+            duration: 1.2, 
             ease: [0.16, 1, 0.3, 1],
-            opacity: { duration: 0.8 }
+            opacity: { duration: 1.0 }
           }}
           className={`relative overflow-hidden ${className}`}
         >
