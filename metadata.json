@@ -1,0 +1,6 @@
+{
+  "name": "2inDance",
+  "description": "Official English website of 2inDance by founders Xina & Laura - Brazilian Zouk, Lambada and Ballroom Partner Dance School in London.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
