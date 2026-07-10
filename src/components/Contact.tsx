@@ -99,7 +99,7 @@ export default function Contact({ selectedClass = "" }: ContactProps) {
                 <a
                   href={`https://wa.me/447984564350`}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="flex items-center space-x-4 p-4 bg-[#ffe6a6]/25 hover:bg-[#ffe6a6]/45 border border-[#9bb08a]/20 hover:border-[#f6c86b] rounded-2xl transition-all duration-300 group"
                 >
                   <div className="p-3 bg-[#9bb08a]/10 border border-[#9bb08a]/20 rounded-xl text-[#3b3f3a] group-hover:bg-[#9bb08a]/20 transition-all">

@@ -83,7 +83,7 @@ export default function Footer() {
             <a
               href="https://instagram.com"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="p-2.5 bg-white/5 border border-[#9bb08a]/20 hover:border-[#f6c86b] text-[#fff6da] hover:text-[#f6c86b] rounded-xl transition-all duration-300"
               title="Instagram"
             >
@@ -92,7 +92,7 @@ export default function Footer() {
             <a
               href="https://facebook.com"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="p-2.5 bg-white/5 border border-[#9bb08a]/20 hover:border-[#f6c86b] text-[#fff6da] hover:text-[#f6c86b] rounded-xl transition-all duration-300"
               title="Facebook"
             >
@@ -101,7 +101,7 @@ export default function Footer() {
             <a
               href="https://youtube.com"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="p-2.5 bg-white/5 border border-[#9bb08a]/20 hover:border-[#f6c86b] text-[#fff6da] hover:text-[#f6c86b] rounded-xl transition-all duration-300"
               title="YouTube"
             >
@@ -110,7 +110,7 @@ export default function Footer() {
             <a
               href={`https://wa.me/447984564350`}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="p-2.5 bg-white/5 border border-[#9bb08a]/20 hover:border-[#f6c86b] text-[#fff6da] hover:text-[#f6c86b] rounded-xl transition-all duration-300"
               title="WhatsApp"
             >

@@ -175,7 +175,7 @@ export default function Media() {
               <a
                 href="https://spotify.com"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="inline-flex items-center space-x-3 bg-[#f6c86b] hover:bg-[#ffe6a6] text-[#3b3f3a] font-montserrat text-xs font-bold tracking-widest uppercase px-8 py-4.5 rounded-xl transition-all duration-300 shadow-md cursor-pointer hover:-translate-y-0.5"
               >
                 <span>Listen on Spotify</span>
