@@ -9,6 +9,22 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
 
   const [currentPage, setCurrentPage] = useState("home");
+  const [frontpage, setFrontpage] = useState<any>({
+    brand_name: "2inDance",
+    brand_tagline: "The Art of FusionDance in Motion",
+    logo_url: ""
+  });
+
+  useEffect(() => {
+    fetch("/api/frontpage")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.success) {
+          setFrontpage(data);
+        }
+      })
+      .catch((err) => console.error("Error loading frontpage content in Navbar:", err));
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -75,18 +91,24 @@ export default function Navbar() {
             id="nav-logo-btn"
           >
             <img
-              src={logoImage}
-              alt="2inDance Logo"
+              src={frontpage.logo_url || logoImage}
+              alt="Brand Logo"
               referrerPolicy="no-referrer"
               className="w-11 h-11 rounded-full border border-[#f6c86b]/40 object-cover group-hover:border-[#f6c86b] transition-all duration-300 shadow-md group-hover:scale-105"
             />
             <div>
               <span className="font-display text-xl font-bold tracking-tight text-[#fff6da] flex items-baseline">
-                2<span className="italic font-sans text-xs lowercase text-[#f6c86b] mx-0.5">in</span>
-                <span className="font-display font-medium text-white">Dance</span>
+                {frontpage.brand_name === "2inDance" ? (
+                  <>
+                    2<span className="italic font-sans text-xs lowercase text-[#f6c86b] mx-0.5">in</span>
+                    <span className="font-display font-medium text-white">Dance</span>
+                  </>
+                ) : (
+                  frontpage.brand_name || "2inDance"
+                )}
               </span>
               <p className="text-[9px] font-montserrat tracking-widest text-[#ffe6a6]/80 uppercase leading-none">
-                by Xina & Laura
+                {frontpage.brand_tagline || "by Xina & Laura"}
               </p>
             </div>
           </button>

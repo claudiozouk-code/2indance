@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { brandDetails } from "../data";
@@ -5,6 +6,26 @@ import { brandDetails } from "../data";
 import logoImage from "../assets/images/logo_2indance_1782381576138.jpg";
 
 export default function Hero() {
+  const [frontpage, setFrontpage] = useState<any>({
+    hero_title_line1: "FusionDance",
+    hero_title_line2: "Social",
+    hero_title_line3: "Soulzouk Methodology",
+    hero_subtitle: "Learn the beautiful art of FusionDance in partner dance. Master the flow, physical conversation, and technique of Soulzouk in Hong Kong.",
+    hero_cta_primary: "Book a Trial Class",
+    hero_cta_secondary: "Explore Classes"
+  });
+
+  useEffect(() => {
+    fetch("/api/frontpage")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.success) {
+          setFrontpage(data);
+        }
+      })
+      .catch((err) => console.error("Error fetching frontpage settings in Hero:", err));
+  }, []);
+
   const handleScrollTo = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
@@ -56,7 +77,16 @@ export default function Hero() {
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center justify-center pt-28 pb-16 overflow-hidden bg-[#3b3f3a] text-white"
+      className="relative min-h-screen flex items-center justify-center pt-28 pb-16 overflow-hidden text-white"
+      style={
+        frontpage.hero_bg_type === "image" && frontpage.hero_bg_image
+          ? {
+              backgroundImage: `linear-gradient(to bottom, rgba(59, 63, 58, 0.75), rgba(28, 46, 36, 0.9)), url(${frontpage.hero_bg_image})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }
+          : { backgroundColor: "#3b3f3a" }
+      }
     >
       {/* 1. Ambient Background Glows representing Connection (Lead & Follow) */}
       <motion.div
@@ -88,10 +118,11 @@ export default function Hero() {
       />
 
       {/* 2. 3D Flowing Dance Ribbon Lines (Representing social dance movement & fluid connection paths) */}
-      <div 
-        className="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center" 
-        style={{ perspective: "1200px" }}
-      >
+      {frontpage.hero_bg_type !== "image" && (
+        <div 
+          className="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center" 
+          style={{ perspective: "1200px" }}
+        >
         <motion.div
           style={{ transformStyle: "preserve-3d" }}
           animate={{
@@ -230,6 +261,7 @@ export default function Hero() {
           />
         </motion.div>
       </div>
+      )}
 
       {/* 3. Subtle grid overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#fff6da_1px,transparent_1px),linear-gradient(to_bottom,#fff6da_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.03] pointer-events-none" />
@@ -276,18 +308,14 @@ export default function Hero() {
                   variants={wordVariants} 
                   className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-[#ffe6a6] via-white to-[#ffe6a6]"
                 >
-                  FusionDance
+                  {frontpage.hero_title_line1 || "FusionDance"}
                 </motion.span>
               </div>
 
               {/* Row 2: Social Dance */}
               <div className="flex flex-wrap gap-x-3 justify-center lg:justify-start overflow-hidden py-1">
-                <motion.span variants={wordVariants} className="inline-block">Social</motion.span>
-                <motion.span 
-                  variants={wordVariants} 
-                  className="inline-block text-[#f6c86b]"
-                >
-                  Dance
+                <motion.span variants={wordVariants} className="inline-block">
+                  {frontpage.hero_title_line2 || "Social"}
                 </motion.span>
               </div>
 
@@ -305,7 +333,7 @@ export default function Hero() {
                     ease: "easeInOut",
                   }}
                 >
-                  Soulzouk Methodology
+                  {frontpage.hero_title_line3 || "Soulzouk Methodology"}
                 </motion.span>
                 
                 {/* Active underlying glowing trace line representing flow of lead & follow */}
@@ -325,7 +353,7 @@ export default function Hero() {
               transition={{ duration: 0.8, delay: 0.85, ease: [0.16, 1, 0.3, 1] }}
               className="font-sans text-sm sm:text-base md:text-lg text-[#fff6da]/80 max-w-xl leading-relaxed font-light"
             >
-              Learn the beautiful art of FusionDance in partner dance. Master the flow, physical conversation, and technique of Soulzouk in Hong Kong.
+              {frontpage.hero_subtitle || "Learn Brazilian Zouk, Lambada, and Samba with Xina and Laura in Hong Kong. Discover fluidity, harmony, and the joy of partner dancing."}
             </motion.p>
 
             {/* Action CTAs */}
@@ -341,7 +369,7 @@ export default function Hero() {
                 onClick={() => handleScrollTo("contact")}
                 className="w-full sm:w-auto bg-[#f6c86b] hover:bg-[#ffe6a6] text-[#3b3f3a] font-montserrat text-xs font-bold tracking-widest uppercase px-8 py-4 rounded-xl transition-all duration-300 shadow-lg shadow-[#f6c86b]/15 transform cursor-pointer flex items-center justify-center space-x-2"
               >
-                <span>Book a Trial Class</span>
+                <span>{frontpage.hero_cta_primary || "Book a Trial Class"}</span>
                 <ArrowRight className="w-4 h-4" />
               </motion.button>
               
@@ -351,7 +379,7 @@ export default function Hero() {
                 onClick={() => handleScrollTo("classes-events")}
                 className="w-full sm:w-auto border border-[#9bb08a]/30 text-[#fff6da] font-montserrat text-xs font-bold tracking-widest uppercase px-8 py-4 rounded-xl transition-all duration-300 backdrop-blur-md cursor-pointer"
               >
-                Explore Classes
+                {frontpage.hero_cta_secondary || "Explore Classes"}
               </motion.button>
             </motion.div>
 

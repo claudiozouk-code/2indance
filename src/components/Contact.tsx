@@ -13,7 +13,25 @@ export default function Contact({ selectedClass = "" }: ContactProps) {
   const [message, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const [error, setError] = useState("");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const [frontpage, setFrontpage] = useState<any>({
+    brand_phone: brandDetails.phone,
+    brand_email: brandDetails.email,
+    brand_locations: brandDetails.locations[0]
+  });
+
+  useEffect(() => {
+    fetch("/api/frontpage")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.success) {
+          setFrontpage(data);
+        }
+      })
+      .catch((err) => console.error("Error loading frontpage content in Contact:", err));
+  }, []);
 
   useEffect(() => {
     if (selectedClass) {
@@ -21,18 +39,36 @@ export default function Contact({ selectedClass = "" }: ContactProps) {
     }
   }, [selectedClass]);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSending(true);
+    setError("");
 
-    // Simulate sending high-fidelity message to founders
-    setTimeout(() => {
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name, email, message })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setIsSent(true);
+        setName("");
+        setEmail("");
+        setMessage("");
+      } else {
+        throw new Error(data.error || data.details || "Failed to save message to database.");
+      }
+    } catch (err: any) {
+      console.error("Submission error:", err);
+      setError(err.message || "Unable to send. Please make sure remote IP access is enabled for your Hostinger MySQL database.");
+    } finally {
       setIsSending(false);
-      setIsSent(true);
-      setName("");
-      setEmail("");
-      setMessage("");
-    }, 1800);
+    }
   };
 
   return (
@@ -107,13 +143,13 @@ export default function Contact({ selectedClass = "" }: ContactProps) {
                   </div>
                   <div>
                     <p className="font-montserrat text-[9px] font-bold text-[#3b3f3a]/60 uppercase tracking-widest leading-none">WhatsApp Chat</p>
-                    <p className="font-sans text-sm text-[#3b3f3a] mt-1 font-semibold group-hover:text-[#3b3f3a] transition-colors">{brandDetails.phone}</p>
+                    <p className="font-sans text-sm text-[#3b3f3a] mt-1 font-semibold group-hover:text-[#3b3f3a] transition-colors">{frontpage.brand_phone}</p>
                   </div>
                 </a>
 
                 {/* Direct Email */}
                 <a
-                  href={`mailto:${brandDetails.email}`}
+                  href={`mailto:${frontpage.brand_email}`}
                   className="flex items-center space-x-4 p-4 bg-[#ffe6a6]/25 hover:bg-[#ffe6a6]/45 border border-[#9bb08a]/20 hover:border-[#f6c86b] rounded-2xl transition-all duration-300 group"
                 >
                   <div className="p-3 bg-[#9bb08a]/10 border border-[#9bb08a]/20 rounded-xl text-[#3b3f3a] group-hover:bg-[#9bb08a]/20 transition-all">
@@ -121,7 +157,7 @@ export default function Contact({ selectedClass = "" }: ContactProps) {
                   </div>
                   <div>
                     <p className="font-montserrat text-[9px] font-bold text-[#3b3f3a]/60 uppercase tracking-widest leading-none">Direct Email</p>
-                    <p className="font-sans text-sm text-[#3b3f3a] mt-1 font-semibold group-hover:text-[#3b3f3a] transition-colors">{brandDetails.email}</p>
+                    <p className="font-sans text-sm text-[#3b3f3a] mt-1 font-semibold group-hover:text-[#3b3f3a] transition-colors">{frontpage.brand_email}</p>
                   </div>
                 </a>
 
@@ -132,7 +168,7 @@ export default function Contact({ selectedClass = "" }: ContactProps) {
                   </div>
                   <div>
                     <p className="font-montserrat text-[9px] font-bold text-[#3b3f3a]/60 uppercase tracking-widest leading-none">Venues & Studios</p>
-                    <p className="font-sans text-xs text-[#3b3f3a]/90 mt-1 font-medium">{brandDetails.locations[0]}</p>
+                    <p className="font-sans text-xs text-[#3b3f3a]/90 mt-1 font-medium">{frontpage.brand_locations}</p>
                   </div>
                 </div>
               </div>
@@ -249,6 +285,14 @@ export default function Contact({ selectedClass = "" }: ContactProps) {
                     className="w-full bg-[#2a2d29]/80 border border-[#9bb08a]/20 focus:border-[#f6c86b] focus:ring-1 focus:ring-[#f6c86b] rounded-xl px-4 py-3.5 text-sm text-[#fff6da] placeholder-[#fff6da]/30 focus:outline-none transition-all shadow-inner resize-none"
                   />
                 </div>
+
+                {/* Error Notification */}
+                {error && (
+                  <div className="bg-red-500/10 border border-red-500/30 p-3.5 rounded-xl text-xs text-red-300 font-sans leading-relaxed flex items-start space-x-2">
+                    <span className="mt-0.5">⚠️</span>
+                    <span>{error}</span>
+                  </div>
+                )}
 
                 {/* Submit */}
                 <button

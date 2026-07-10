@@ -6,3 +6,7 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Ignore local uploaded media files to protect production uploads on deployment
+uploads/*
+!uploads/.gitkeep

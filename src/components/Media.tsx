@@ -1,17 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Play, Sparkles, Image as ImageIcon, Music, Video, X } from "lucide-react";
 import { mediaItems } from "../data";
 
 export default function Media() {
+  const [media, setMedia] = useState<any[]>(mediaItems);
   const [selectedFilter, setSelectedFilter] = useState<string>("All");
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/media")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setMedia(data);
+        }
+      })
+      .catch((err) => console.error("Error loading media:", err));
+  }, []);
 
   const filters = ["All", "Performance", "Class Highlight", "Workshop", "Social Dance"];
 
   const filteredMedia = selectedFilter === "All"
-    ? mediaItems
-    : mediaItems.filter(item => item.category === selectedFilter);
+    ? media
+    : media.filter(item => item.category === selectedFilter);
 
   return (
     <section id="media" className="py-20 md:py-28 bg-gradient-to-b from-[#F2F4F1] via-[#EAEFE9] to-[#F7FAF6] text-[#3b3f3a] relative overflow-hidden border-t border-[#9bb08a]/25">

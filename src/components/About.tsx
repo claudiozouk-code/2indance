@@ -1,8 +1,22 @@
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Sparkles, Heart, Activity, Award, Check } from "lucide-react";
 import { aboutContent } from "../data";
 
 export default function About() {
+  const [content, setContent] = useState(aboutContent);
+
+  useEffect(() => {
+    fetch("/api/about")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.success) {
+          setContent(data);
+        }
+      })
+      .catch((err) => console.error("Error loading about us from DB:", err));
+  }, []);
+
   return (
     <section id="about" className="py-20 md:py-28 bg-gradient-to-br from-[#FFFDF9] via-[#FAF5EA] to-[#FFF0D4]/70 text-[#3b3f3a] relative overflow-hidden border-t border-[#9bb08a]/25">
       {/* 1. Fluid Topographic Dance Path Waves */}
@@ -44,14 +58,14 @@ export default function About() {
           <div className="inline-flex items-center space-x-2 bg-[#3b3f3a]/5 border border-[#3b3f3a]/10 px-3.5 py-1.5 rounded-full mb-4">
             <Sparkles className="w-3.5 h-3.5 text-[#f6c86b]" />
             <span className="font-montserrat text-[10px] font-bold tracking-widest text-[#3b3f3a]/80 uppercase">
-              {aboutContent.title}
+              {content.title}
             </span>
           </div>
           <h2 className="font-display text-3.5xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 text-[#3b3f3a] uppercase">
             Meet Our School
           </h2>
           <p className="font-sans text-sm sm:text-base text-[#3b3f3a]/70 font-light max-w-xl mx-auto">
-            {aboutContent.subtitle}
+            {content.subtitle}
           </p>
         </motion.div>
 
@@ -70,13 +84,13 @@ export default function About() {
               Our Philosophy
             </span>
             <h3 className="font-display text-3xl font-bold text-[#3b3f3a] tracking-tight leading-tight">
-              {aboutContent.storyTitle}
+              {content.storyTitle}
             </h3>
             <p className="font-sans text-[#3b3f3a]/80 text-sm sm:text-base leading-relaxed font-light">
-              {aboutContent.storyText1}
+              {content.storyText1}
             </p>
             <p className="font-sans text-[#3b3f3a]/80 text-sm sm:text-base leading-relaxed font-light">
-              {aboutContent.storyText2}
+              {content.storyText2}
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
@@ -109,7 +123,7 @@ export default function About() {
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-5 grid grid-cols-2 gap-4"
           >
-            {aboutContent.stats.map((stat, idx) => (
+            {content.stats?.map((stat, idx) => (
               <div
                 key={idx}
                 className="bg-[#ffe6a6]/40 border border-[#9bb08a]/10 p-6 rounded-2xl shadow-sm text-center flex flex-col justify-center items-center group hover:bg-[#ffe6a6]/60 transition-all duration-300"
@@ -144,7 +158,7 @@ export default function About() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-            {aboutContent.founders.map((founder, idx) => (
+            {content.founders?.map((founder, idx) => (
               <motion.div
                 key={idx}
                 initial={{ opacity: 0, y: 40, scale: 0.96 }}

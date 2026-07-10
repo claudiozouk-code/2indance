@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Clock, MapPin, Calendar, CircleDollarSign, Flame, Sparkles } from "lucide-react";
 import { danceStyles, weeklySchedule, upcomingEvents } from "../data";
@@ -10,10 +10,32 @@ interface ClassesEventsProps {
 export default function ClassesEvents({ onSelectClass }: ClassesEventsProps) {
   const [activeTab, setActiveTab] = useState<"weekly" | "events" | "styles">("weekly");
   const [selectedDay, setSelectedDay] = useState<string>("All");
+  const [schedule, setSchedule] = useState<any[]>(weeklySchedule);
+  const [events, setEvents] = useState<any[]>(upcomingEvents);
 
   const daysList = ["All", "Monday", "Wednesday", "Saturday"];
 
-  const filteredSchedule = weeklySchedule.filter(
+  useEffect(() => {
+    fetch("/api/schedule")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setSchedule(data);
+        }
+      })
+      .catch((err) => console.error("Error loading schedule:", err));
+
+    fetch("/api/events")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setEvents(data);
+        }
+      })
+      .catch((err) => console.error("Error loading events:", err));
+  }, []);
+
+  const filteredSchedule = schedule.filter(
     (item) => selectedDay === "All" || item.day === selectedDay
   );
 
@@ -235,7 +257,7 @@ export default function ClassesEvents({ onSelectClass }: ClassesEventsProps) {
                 transition={{ duration: 0.4 }}
                 className="grid grid-cols-1 md:grid-cols-2 gap-8"
               >
-                {upcomingEvents.map((event) => (
+                {events.map((event) => (
                   <div
                     key={event.id}
                     className="bg-[#2a2d29]/80 border border-[#9bb08a]/20 rounded-3xl overflow-hidden shadow-xl hover:border-[#f6c86b]/30 transition-all duration-300 flex flex-col group"

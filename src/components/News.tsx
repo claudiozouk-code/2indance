@@ -1,12 +1,24 @@
-import { useState, FormEvent } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Calendar, User, ArrowRight, Sparkles, X, MailCheck } from "lucide-react";
 import { newsItems } from "../data";
 
 export default function News() {
+  const [articles, setArticles] = useState<any[]>(newsItems);
   const [activeArticle, setActiveArticle] = useState<any | null>(null);
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [isSubscribed, setIsSubscribed] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/news")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setArticles(data);
+        }
+      })
+      .catch((err) => console.error("Error loading news articles:", err));
+  }, []);
 
   const handleSubscribe = (e: FormEvent) => {
     e.preventDefault();
@@ -83,7 +95,7 @@ export default function News() {
 
         {/* News Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          {newsItems.map((news, idx) => (
+          {articles.map((news, idx) => (
             <motion.article
               key={news.id}
               initial={{ opacity: 0, y: 35, scale: 0.96 }}

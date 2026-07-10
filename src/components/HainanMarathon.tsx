@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { 
   ExternalLink, 
@@ -16,15 +17,42 @@ import {
 } from "lucide-react";
 
 // @ts-ignore
-import logoImage from "../assets/images/hainan_zouk_logo_1783656713499.jpg";
+import logoImageDefault from "../assets/images/hainan_zouk_logo_1783656713499.jpg";
 // @ts-ignore
-import resortImage from "../assets/images/stony_brook_resort_1783657607790.jpg";
+import resortImageDefault from "../assets/images/stony_brook_resort_1783657607790.jpg";
 // @ts-ignore
-import roomImage from "../assets/images/standard_hotel_room_1783657625011.jpg";
+import roomImageDefault from "../assets/images/standard_hotel_room_1783657625011.jpg";
 // @ts-ignore
-import beachImage from "../assets/images/dadonghai_beach_1783657644143.jpg";
+import beachImageDefault from "../assets/images/dadonghai_beach_1783657644143.jpg";
 
 export default function HainanMarathon() {
+  const [frontpage, setFrontpage] = useState<any>({
+    hainan_badge: "Featured Global Event • March 2027",
+    hainan_title: "Hainan Island Zouk Marathon",
+    hainan_quote: "Hainan Island — China's tropical paradise. White-sand beaches, green mountains, fresh seafood, and vibrant reefs set the stage for endless adventures, unforgettable nights of dance, and the taste of local flavors.",
+    hainan_link: "https://hainanzouk.2indance.com",
+    hainan_logo_image: "",
+    hainan_resort_image: "",
+    hainan_room_image: "",
+    hainan_beach_image: ""
+  });
+
+  const logoImage = frontpage.hainan_logo_image || logoImageDefault;
+  const resortImage = frontpage.hainan_resort_image || resortImageDefault;
+  const roomImage = frontpage.hainan_room_image || roomImageDefault;
+  const beachImage = frontpage.hainan_beach_image || beachImageDefault;
+
+  useEffect(() => {
+    fetch("/api/frontpage")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.success) {
+          setFrontpage(data);
+        }
+      })
+      .catch((err) => console.error("Error loading frontpage content in HainanMarathon:", err));
+  }, []);
+
   return (
     <section 
       id="hainan" 
@@ -63,15 +91,15 @@ export default function HainanMarathon() {
           <div className="inline-flex items-center space-x-2 bg-[#f6c86b]/10 border border-[#f6c86b]/20 px-3.5 py-1.5 rounded-full mb-4">
             <Sparkles className="w-3.5 h-3.5 text-[#f6c86b]" />
             <span className="font-montserrat text-[10px] font-bold tracking-widest text-[#ffe6a6] uppercase">
-              Featured Global Event • March 2027
+              {frontpage.hainan_badge || "Featured Global Event • March 2027"}
             </span>
           </div>
           <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-4 bg-gradient-to-r from-[#fff6da] via-[#ffe6a6] to-[#f6c86b] bg-clip-text text-transparent uppercase">
-            Hainan Island Zouk Marathon
+            {frontpage.hainan_title || "Hainan Island Zouk Marathon"}
           </h2>
           <div className="h-1 w-24 bg-gradient-to-r from-transparent via-[#f6c86b] to-transparent mx-auto mb-5" />
           <p className="font-sans text-sm sm:text-base text-[#fff6da]/85 font-light max-w-2xl mx-auto italic">
-            "Hainan Island — China's tropical paradise. White-sand beaches, green mountains, fresh seafood, and vibrant reefs set the stage for endless adventures, unforgettable nights of dance, and the taste of local flavors."
+            "{frontpage.hainan_quote || "Hainan Island — China's tropical paradise. White-sand beaches, green mountains, fresh seafood, and vibrant reefs set the stage for endless adventures, unforgettable nights of dance, and the taste of local flavors."}"
           </p>
         </div>
 
@@ -97,12 +125,12 @@ export default function HainanMarathon() {
                   Official Portal
                 </span>
                 <a 
-                  href="https://hainanzouk.2indance.com" 
+                  href={frontpage.hainan_link || "https://hainanzouk.2indance.com"} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="inline-flex items-center space-x-2 text-sm text-[#fff6da]/90 hover:text-[#f6c86b] font-mono transition-colors border-b border-dashed border-[#ffe6a6]/30 pb-0.5"
                 >
-                  <span>hainanzouk.2indance.com</span>
+                  <span>{(frontpage.hainan_link || "hainanzouk.2indance.com").replace("https://", "").replace("http://", "")}</span>
                   <ExternalLink className="w-3.5 h-3.5" />
                 </a>
               </div>

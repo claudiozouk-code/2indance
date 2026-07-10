@@ -9,12 +9,15 @@ import Media from "./components/Media";
 import News from "./components/News";
 import HainanMarathon from "./components/HainanMarathon";
 import Contact from "./components/Contact";
+import AdminPanel from "./components/AdminPanel";
 import Footer from "./components/Footer";
+import { injectTrackingTags, trackUserEvent } from "./utils";
 
 interface ScrollSectionProps {
+  key?: string;
   children: React.ReactNode;
   zIndex: number;
-  effect: "zoom-in" | "slide-left" | "zoom-out" | "slide-right" | "3d-rise" | "hero";
+  effect: string;
   className?: string;
 }
 
@@ -100,23 +103,33 @@ function ScrollSection({ children, zIndex, effect, className = "" }: ScrollSecti
   );
 }
 
+const DEFAULT_SECTIONS = [
+  { id: "hero", name: "Hero Section", visible: true, zIndex: 10, effect: "hero" },
+  { id: "about", name: "About Us", visible: true, zIndex: 20, effect: "zoom-in" },
+  { id: "classes-events", name: "Weekly Classes & Events", visible: true, zIndex: 30, effect: "slide-left" },
+  { id: "media", name: "Media & Gallery", visible: true, zIndex: 35, effect: "zoom-out" },
+  { id: "news", name: "News & Articles", visible: true, zIndex: 40, effect: "slide-right" },
+  { id: "hainan", name: "Hainan Zouk Marathon", visible: true, zIndex: 43, effect: "zoom-in" },
+  { id: "contact", name: "Contact & Booking", visible: true, zIndex: 48, effect: "3d-rise" }
+];
+
 export default function App() {
   const [selectedClass, setSelectedClass] = useState("");
   const [currentPage, setCurrentPage] = useState("home");
+  const [sectionsLayout, setSectionsLayout] = useState<any[]>(DEFAULT_SECTIONS);
 
   const handleSelectClass = (className: string) => {
     setSelectedClass(className);
+    trackUserEvent("select_class", "Engagement", className);
     window.location.hash = "#/contact";
   };
 
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash;
-      if (hash.startsWith("#/")) {
-        setCurrentPage(hash.slice(2));
-      } else {
-        setCurrentPage("home");
-      }
+      const targetPage = hash.startsWith("#/") ? hash.slice(2) : "home";
+      setCurrentPage(targetPage);
+      trackUserEvent("view_page", "Navigation", targetPage);
       window.scrollTo(0, 0);
     };
 
@@ -125,12 +138,132 @@ export default function App() {
     return () => window.removeEventListener("hashchange", handleHash);
   }, []);
 
+  // SEO & Global tags optimization client-side synchronizer
+  useEffect(() => {
+    fetch("/api/frontpage")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.success) {
+          // 1. Dynamic document title
+          if (data.seo_title) {
+            document.title = data.seo_title;
+          }
+
+          // 2. Meta description (Search Engine Compatibility)
+          if (data.seo_meta_description !== undefined) {
+            let descMeta = document.querySelector('meta[name="description"]');
+            if (!descMeta) {
+              descMeta = document.createElement("meta");
+              descMeta.setAttribute("name", "description");
+              document.head.appendChild(descMeta);
+            }
+            descMeta.setAttribute("content", data.seo_meta_description || data.brand_description || "");
+          }
+
+          // 3. Meta keywords (Tag Optimization)
+          if (data.seo_keywords !== undefined) {
+            let keyMeta = document.querySelector('meta[name="keywords"]');
+            if (!keyMeta) {
+              keyMeta = document.createElement("meta");
+              keyMeta.setAttribute("name", "keywords");
+              document.head.appendChild(keyMeta);
+            }
+            keyMeta.setAttribute("content", data.seo_keywords || "");
+          }
+
+          // 4. Robots indexing (Search Engine compatibility)
+          if (data.seo_robots) {
+            let robMeta = document.querySelector('meta[name="robots"]');
+            if (!robMeta) {
+              robMeta = document.createElement("meta");
+              robMeta.setAttribute("name", "robots");
+              document.head.appendChild(robMeta);
+            }
+            robMeta.setAttribute("content", data.seo_robots);
+          }
+
+          // 5. Google Site Verification (GSC tracking tag optimization)
+          if (data.google_site_verification) {
+            let gscMeta = document.querySelector('meta[name="google-site-verification"]');
+            if (!gscMeta) {
+              gscMeta = document.createElement("meta");
+              gscMeta.setAttribute("name", "google-site-verification");
+              document.head.appendChild(gscMeta);
+            }
+            gscMeta.setAttribute("content", data.google_site_verification);
+          }
+
+          // 6. OpenGraph custom OG Image
+          if (data.seo_og_image) {
+            let ogImg = document.querySelector('meta[property="og:image"]');
+            if (!ogImg) {
+              ogImg = document.createElement("meta");
+              ogImg.setAttribute("property", "og:image");
+              document.head.appendChild(ogImg);
+            }
+            ogImg.setAttribute("content", data.seo_og_image);
+          }
+
+          // 7. Dynamic Favicon Link
+          if (data.favicon_url) {
+            let favLink: HTMLLinkElement | null = document.querySelector("link[rel='icon']") || document.querySelector("link[rel='shortcut icon']");
+            if (!favLink) {
+              favLink = document.createElement("link");
+              favLink.setAttribute("rel", "icon");
+              document.head.appendChild(favLink);
+            }
+            favLink.setAttribute("href", data.favicon_url);
+          }
+
+          // 8. Custom HTML / Optimization tags injector (scripts, verification, meta tags)
+          if (data.seo_custom_tags) {
+            injectTrackingTags(data.seo_custom_tags);
+          }
+
+          // 9. Load Page Builder Dynamic Layout
+          if (data.sections_order) {
+            try {
+              const parsed = JSON.parse(data.sections_order);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                // Merge with default list to handle any added or missing sections gracefully
+                const merged = parsed.map((item: any) => {
+                  const def = DEFAULT_SECTIONS.find(d => d.id === item.id);
+                  return { ...def, ...item };
+                });
+                
+                // Add any default sections that might be missing from the database record
+                DEFAULT_SECTIONS.forEach(def => {
+                  if (!merged.some((m: any) => m.id === def.id)) {
+                    merged.push(def);
+                  }
+                });
+
+                setSectionsLayout(merged);
+              } else {
+                setSectionsLayout(DEFAULT_SECTIONS);
+              }
+            } catch (err) {
+              setSectionsLayout(DEFAULT_SECTIONS);
+            }
+          } else {
+            setSectionsLayout(DEFAULT_SECTIONS);
+          }
+        }
+      })
+      .catch((err) => console.error("SEO sync error:", err));
+  }, []);
+
   const renderSubPage = () => {
     let content = null;
     let title = "";
     let subtitle = "";
 
     switch (currentPage) {
+      case "admin":
+        content = <AdminPanel />;
+        title = "Admin Panel";
+        subtitle = "Modify frontpage content, manage classes, upcoming events, news articles, and read contact bookings.";
+        break;
       case "about":
         content = <About />;
         title = "About Us";
@@ -227,40 +360,56 @@ export default function App() {
       {currentPage === "home" ? (
         /* Main Page Layout */
         <main className="relative overflow-hidden">
-          {/* Hero Section - Fades back beautifully as you scroll */}
-          <ScrollSection zIndex={10} effect="hero">
-            <Hero />
-          </ScrollSection>
-
-          {/* About Us (Founders Xina & Laura) Section - Zoom In & Up */}
-          <ScrollSection zIndex={20} effect="zoom-in">
-            <About />
-          </ScrollSection>
-
-          {/* Class/Events Section - Slide in from Left with subtle angle */}
-          <ScrollSection zIndex={30} effect="slide-left">
-            <ClassesEvents onSelectClass={handleSelectClass} />
-          </ScrollSection>
-
-          {/* Media (Gallery & Videos) Section - Zoom Out & Up */}
-          <ScrollSection zIndex={35} effect="zoom-out">
-            <Media />
-          </ScrollSection>
-
-          {/* News Section - Slide in from Right with subtle angle */}
-          <ScrollSection zIndex={40} effect="slide-right">
-            <News />
-          </ScrollSection>
-
-          {/* Hainan Island Zouk Marathon Section */}
-          <ScrollSection zIndex={43} effect="zoom-in">
-            <HainanMarathon />
-          </ScrollSection>
-
-          {/* Booking & Contact Section with FAQ Accordions - Premium 3D Heavy Rise */}
-          <ScrollSection zIndex={48} effect="3d-rise">
-            <Contact selectedClass={selectedClass} />
-          </ScrollSection>
+          {sectionsLayout
+            .filter((sec: any) => sec.visible !== false)
+            .map((sec: any) => {
+              switch (sec.id) {
+                case "hero":
+                  return (
+                    <ScrollSection key="hero" zIndex={sec.zIndex} effect={sec.effect}>
+                      <Hero />
+                    </ScrollSection>
+                  );
+                case "about":
+                  return (
+                    <ScrollSection key="about" zIndex={sec.zIndex} effect={sec.effect}>
+                      <About />
+                    </ScrollSection>
+                  );
+                case "classes-events":
+                  return (
+                    <ScrollSection key="classes-events" zIndex={sec.zIndex} effect={sec.effect}>
+                      <ClassesEvents onSelectClass={handleSelectClass} />
+                    </ScrollSection>
+                  );
+                case "media":
+                  return (
+                    <ScrollSection key="media" zIndex={sec.zIndex} effect={sec.effect}>
+                      <Media />
+                    </ScrollSection>
+                  );
+                case "news":
+                  return (
+                    <ScrollSection key="news" zIndex={sec.zIndex} effect={sec.effect}>
+                      <News />
+                    </ScrollSection>
+                  );
+                case "hainan":
+                  return (
+                    <ScrollSection key="hainan" zIndex={sec.zIndex} effect={sec.effect}>
+                      <HainanMarathon />
+                    </ScrollSection>
+                  );
+                case "contact":
+                  return (
+                    <ScrollSection key="contact" zIndex={sec.zIndex} effect={sec.effect}>
+                      <Contact selectedClass={selectedClass} />
+                    </ScrollSection>
+                  );
+                default:
+                  return null;
+              }
+            })}
         </main>
       ) : (
         renderSubPage()
