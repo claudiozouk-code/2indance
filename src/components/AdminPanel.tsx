@@ -161,6 +161,7 @@ export default function AdminPanel() {
   const [scheduleList, setScheduleList] = useState<any[]>([]);
   const [eventsList, setEventsList] = useState<any[]>([]);
   const [mediaList, setMediaList] = useState<any[]>([]);
+  const [eventGalleriesList, setEventGalleriesList] = useState<any[]>([]);
   const [newsList, setNewsList] = useState<any[]>([]);
   const [submissionsList, setSubmissionsList] = useState<any[]>([]);
 
@@ -170,7 +171,7 @@ export default function AdminPanel() {
 
   // Modals / Adding states
   const [editingItem, setEditingItem] = useState<any | null>(null);
-  const [modalType, setModalType] = useState<"founder" | "schedule" | "event" | "media" | "news" | "">("");
+  const [modalType, setModalType] = useState<"founder" | "schedule" | "event" | "media" | "eventGallery" | "news" | "">("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Form Field States
@@ -178,6 +179,16 @@ export default function AdminPanel() {
   const [scheduleForm, setScheduleForm] = useState({ id: "", day: "Monday", time: "", style: "", level: "", location: "", price: "" });
   const [eventForm, setEventForm] = useState({ id: "", title: "", date: "", time: "", location: "", description: "", image: "", price: "" });
   const [mediaForm, setMediaForm] = useState({ id: "", type: "photo", title: "", thumbnail: "", url: "", category: "Class Highlight" });
+  const [eventGalleryForm, setEventGalleryForm] = useState({
+    id: "",
+    title: "",
+    date: "",
+    location: "",
+    category: "Marathon",
+    coverImage: "",
+    description: "",
+    photosText: ""
+  });
   const [newsForm, setNewsForm] = useState({ id: "", title: "", excerpt: "", content: "", date: "", author: "2inDance Team", image: "", category: "Announcement" });
 
   useEffect(() => {
@@ -247,11 +258,12 @@ export default function AdminPanel() {
   const fetchAllData = async () => {
     setIsLoadingData(true);
     try {
-      const [resAbout, resSched, resEvt, resMed, resNews, resSub, resFrontpage] = await Promise.all([
+      const [resAbout, resSched, resEvt, resMed, resGalleries, resNews, resSub, resFrontpage] = await Promise.all([
         fetch("/api/about"),
         fetch("/api/schedule"),
         fetch("/api/events"),
         fetch("/api/media"),
+        fetch("/api/event-galleries"),
         fetch("/api/news"),
         fetch("/api/submissions"),
         fetch("/api/frontpage")
@@ -261,6 +273,7 @@ export default function AdminPanel() {
       const sched = await resSched.json();
       const evt = await resEvt.json();
       const med = await resMed.json();
+      const galleries = await resGalleries.json();
       const news = await resNews.json();
       const subs = await resSub.json();
       const frontpage = await resFrontpage.json();
@@ -269,6 +282,7 @@ export default function AdminPanel() {
       setScheduleList(sched);
       setEventsList(evt);
       setMediaList(med);
+      if (Array.isArray(galleries)) setEventGalleriesList(galleries);
       setNewsList(news);
       setSubmissionsList(subs);
       
@@ -617,6 +631,93 @@ export default function AdminPanel() {
       fetchAllData();
     } catch (err) {
       triggerAlert("error", "Erro.");
+    }
+  };
+
+  // --- EVENT GALLERIES CRUD ---
+  const handleOpenEventGalleryModal = (item: any = null) => {
+    if (item) {
+      setEditingItem(item);
+      const photosText = Array.isArray(item.photos)
+        ? item.photos.map((p: any) => typeof p === "string" ? p : p.url).join("\n")
+        : "";
+      setEventGalleryForm({
+        id: item.id || "",
+        title: item.title || "",
+        date: item.date || "",
+        location: item.location || "",
+        category: item.category || "Marathon",
+        coverImage: item.coverImage || "",
+        description: item.description || "",
+        photosText
+      });
+    } else {
+      setEditingItem(null);
+      setEventGalleryForm({
+        id: "",
+        title: "",
+        date: "",
+        location: "",
+        category: "Marathon",
+        coverImage: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=1000",
+        description: "",
+        photosText: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=1000\nhttps://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&q=80&w=1000\nhttps://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=1000"
+      });
+    }
+    setModalType("eventGallery");
+    setIsModalOpen(true);
+  };
+
+  const handleSaveEventGallery = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const isEdit = !!editingItem;
+    const url = isEdit ? `/api/event-galleries/${editingItem.id}` : "/api/event-galleries";
+    const method = isEdit ? "PUT" : "POST";
+
+    const photosList = eventGalleryForm.photosText
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0)
+      .map((urlStr, idx) => ({
+        id: `p-${Date.now()}-${idx}`,
+        url: urlStr,
+        title: `Foto ${idx + 1}`
+      }));
+
+    const payload = {
+      title: eventGalleryForm.title,
+      date: eventGalleryForm.date,
+      location: eventGalleryForm.location,
+      category: eventGalleryForm.category,
+      coverImage: eventGalleryForm.coverImage,
+      description: eventGalleryForm.description,
+      photos: photosList
+    };
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        triggerAlert("success", isEdit ? "Galeria editada!" : "Nova galeria criada!");
+        setIsModalOpen(false);
+        fetchAllData();
+      }
+    } catch (err) {
+      triggerAlert("error", "Erro de rede ao salvar galeria.");
+    }
+  };
+
+  const handleDeleteEventGallery = async (id: any) => {
+    if (!confirm("Deletar esta galeria de evento?")) return;
+    try {
+      await fetch(`/api/event-galleries/${id}`, { method: "DELETE" });
+      triggerAlert("success", "Galeria excluída.");
+      fetchAllData();
+    } catch (err) {
+      triggerAlert("error", "Erro de rede.");
     }
   };
 
@@ -1931,53 +2032,114 @@ export default function AdminPanel() {
                 </motion.div>
               )}
 
-              {/* TAB 4: MEDIA GALLERY */}
+              {/* TAB 4: MEDIA GALLERY & EVENT PHOTO GALLERIES */}
               {activeTab === "media" && (
                 <motion.div
                   key="tab-media"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className="space-y-6 text-left"
+                  className="space-y-8 text-left"
                 >
-                  <div className="flex items-center justify-between flex-wrap gap-4">
-                    <div>
-                      <h3 className="font-display text-2xl font-bold uppercase tracking-tight text-white">
-                        Media & Gallery Items
-                      </h3>
-                      <p className="text-xs text-[#fff6da]/70">Manage the photos and video demos highlighted on the gallery page.</p>
+                  {/* SECTION 1: EVENT PHOTO GALLERIES */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between flex-wrap gap-4 border-b border-white/10 pb-4">
+                      <div>
+                        <h3 className="font-display text-2xl font-bold uppercase tracking-tight text-[#f6c86b]">
+                          Galerias de Fotos por Evento
+                        </h3>
+                        <p className="text-xs text-[#fff6da]/70">
+                          Gerencie as galerias de fotos dos eventos (com imagem de capa e modal moderno de exibição).
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleOpenEventGalleryModal()}
+                        className="inline-flex items-center space-x-1.5 bg-[#f6c86b] hover:bg-[#ffe6a6] text-[#3b3f3a] px-4 py-2.5 rounded-xl text-xs font-montserrat font-bold uppercase tracking-widest transition-all cursor-pointer shadow-md"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Nova Galeria de Fotos</span>
+                      </button>
                     </div>
-                    <button
-                      onClick={() => handleOpenMediaModal()}
-                      className="inline-flex items-center space-x-1.5 bg-[#f6c86b] hover:bg-[#ffe6a6] text-[#3b3f3a] px-4 py-2.5 rounded-xl text-xs font-montserrat font-bold uppercase tracking-widest transition-all cursor-pointer"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Add Media</span>
-                    </button>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                      {eventGalleriesList.map((gal) => (
+                        <div key={gal.id} className="bg-black/20 border border-white/10 rounded-2xl overflow-hidden hover:border-[#f6c86b]/40 transition-all flex flex-col justify-between">
+                          <div>
+                            <div className="h-40 relative bg-gray-900">
+                              <img src={gal.coverImage} alt={gal.title} className="w-full h-full object-cover" />
+                              <span className="absolute top-2 left-2 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] uppercase font-mono text-[#f6c86b] tracking-wider font-bold">
+                                {gal.category}
+                              </span>
+                              <span className="absolute top-2 right-2 bg-[#f6c86b] text-[#3b3f3a] px-2.5 py-1 rounded-full text-[10px] font-mono font-extrabold shadow-md">
+                                {Array.isArray(gal.photos) ? gal.photos.length : 0} Fotos
+                              </span>
+                            </div>
+                            <div className="p-4 space-y-2">
+                              <h4 className="font-display text-base font-bold text-white leading-tight truncate">
+                                {gal.title}
+                              </h4>
+                              <p className="text-[11px] font-mono text-[#fff6da]/60">
+                                📅 {gal.date} • 📍 {gal.location}
+                              </p>
+                              <p className="text-xs text-white/70 line-clamp-2 font-light">
+                                {gal.description}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="p-3 bg-black/40 border-t border-white/5 flex items-center justify-between text-xs font-bold">
+                            <span className="text-[#9bb08a] text-[10px]">Capa Configurada</span>
+                            <div className="space-x-3">
+                              <button onClick={() => handleOpenEventGalleryModal(gal)} className="text-[#ffe6a6] hover:text-[#f6c86b]">Editar</button>
+                              <button onClick={() => handleDeleteEventGallery(gal.id)} className="text-red-300 hover:text-red-400">Excluir</button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-                    {mediaList.map((item) => (
-                      <div key={item.id} className="bg-black/20 border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 transition-all">
-                        <div className="h-36 relative">
-                          <img src={item.thumbnail} alt={item.title} className="w-full h-full object-cover" />
-                          <div className="absolute top-2 left-2 bg-black/60 px-2 py-0.5 rounded text-[9px] uppercase font-mono text-[#f6c86b] tracking-wider flex items-center space-x-1">
-                            {item.type === "video" ? <Video className="w-2.5 h-2.5" /> : <ImageIcon className="w-2.5 h-2.5" />}
-                            <span>{item.type}</span>
-                          </div>
-                        </div>
-                        <div className="p-3.5 space-y-2">
-                          <span className="text-[10px] font-mono font-bold text-[#9bb08a] uppercase tracking-wider block">{item.category}</span>
-                          <span className="text-xs font-bold text-white block leading-tight truncate">{item.title}</span>
-                          
-                          <div className="flex items-center justify-end space-x-2 pt-2 border-t border-white/5 text-[10px] font-bold">
-                            <button onClick={() => handleOpenMediaModal(item)} className="text-[#ffe6a6] hover:text-[#f6c86b]">Edit</button>
-                            <span className="text-white/10">|</span>
-                            <button onClick={() => handleDeleteMedia(item.id)} className="text-red-300 hover:text-red-400">Delete</button>
-                          </div>
-                        </div>
+                  {/* SECTION 2: FEATURED VIDEOS & DEMOS */}
+                  <div className="space-y-4 pt-6 border-t border-white/10">
+                    <div className="flex items-center justify-between flex-wrap gap-4 pb-2">
+                      <div>
+                        <h3 className="font-display text-xl font-bold uppercase tracking-tight text-white">
+                          Vídeos em Destaque
+                        </h3>
+                        <p className="text-xs text-[#fff6da]/70">Gerencie os vídeos e demos da seção de mídias.</p>
                       </div>
-                    ))}
+                      <button
+                        onClick={() => handleOpenMediaModal()}
+                        className="inline-flex items-center space-x-1.5 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-xs font-montserrat font-bold uppercase tracking-widest transition-all cursor-pointer border border-white/10"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Adicionar Vídeo</span>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                      {mediaList.map((item) => (
+                        <div key={item.id} className="bg-black/20 border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 transition-all">
+                          <div className="h-32 relative">
+                            <img src={item.thumbnail} alt={item.title} className="w-full h-full object-cover" />
+                            <div className="absolute top-2 left-2 bg-black/60 px-2 py-0.5 rounded text-[9px] uppercase font-mono text-[#f6c86b] tracking-wider flex items-center space-x-1">
+                              {item.type === "video" ? <Video className="w-2.5 h-2.5" /> : <ImageIcon className="w-2.5 h-2.5" />}
+                              <span>{item.type}</span>
+                            </div>
+                          </div>
+                          <div className="p-3.5 space-y-2">
+                            <span className="text-[10px] font-mono font-bold text-[#9bb08a] uppercase tracking-wider block">{item.category}</span>
+                            <span className="text-xs font-bold text-white block leading-tight truncate">{item.title}</span>
+                            
+                            <div className="flex items-center justify-end space-x-2 pt-2 border-t border-white/5 text-[10px] font-bold">
+                              <button onClick={() => handleOpenMediaModal(item)} className="text-[#ffe6a6] hover:text-[#f6c86b]">Edit</button>
+                              <span className="text-white/10">|</span>
+                              <button onClick={() => handleDeleteMedia(item.id)} className="text-red-300 hover:text-red-400">Delete</button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </motion.div>
               )}
@@ -2409,6 +2571,103 @@ export default function AdminPanel() {
                   <div className="pt-4 border-t border-white/5 text-right space-x-3">
                     <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-bold uppercase tracking-wider">Cancel</button>
                     <button type="submit" className="px-6 py-2.5 bg-[#f6c86b] hover:bg-[#ffe6a6] text-[#3b3f3a] rounded-xl text-xs font-bold uppercase tracking-widest">Save Media</button>
+                  </div>
+                </form>
+              )}
+
+              {/* MODAL FORM: EVENT GALLERY */}
+              {modalType === "eventGallery" && (
+                <form onSubmit={handleSaveEventGallery} className="p-6 space-y-4">
+                  <div>
+                    <label className="text-xs font-montserrat font-bold uppercase block mb-1">Título do Evento</label>
+                    <input
+                      type="text"
+                      required
+                      value={eventGalleryForm.title}
+                      onChange={(e) => setEventGalleryForm({ ...eventGalleryForm, title: e.target.value })}
+                      placeholder="Ex: Zouk Summer Marathon 2024"
+                      className="w-full bg-black/20 border border-white/10 rounded-xl py-2.5 px-3.5 text-sm text-white focus:outline-none focus:border-[#f6c86b]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-xs font-montserrat font-bold uppercase block mb-1">Data</label>
+                      <input
+                        type="text"
+                        required
+                        value={eventGalleryForm.date}
+                        onChange={(e) => setEventGalleryForm({ ...eventGalleryForm, date: e.target.value })}
+                        placeholder="Ex: 15-18 Ago 2024"
+                        className="w-full bg-black/20 border border-white/10 rounded-xl py-2.5 px-3.5 text-sm text-white focus:outline-none focus:border-[#f6c86b]"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-montserrat font-bold uppercase block mb-1">Localização</label>
+                      <input
+                        type="text"
+                        required
+                        value={eventGalleryForm.location}
+                        onChange={(e) => setEventGalleryForm({ ...eventGalleryForm, location: e.target.value })}
+                        placeholder="Ex: Hong Kong Central"
+                        className="w-full bg-black/20 border border-white/10 rounded-xl py-2.5 px-3.5 text-sm text-white focus:outline-none focus:border-[#f6c86b]"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-montserrat font-bold uppercase block mb-1">Categoria</label>
+                      <select
+                        value={eventGalleryForm.category}
+                        onChange={(e) => setEventGalleryForm({ ...eventGalleryForm, category: e.target.value })}
+                        className="w-full bg-[#1c2420] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#f6c86b]"
+                      >
+                        <option value="Marathon">Marathon</option>
+                        <option value="Festival">Festival</option>
+                        <option value="Workshop">Workshop</option>
+                        <option value="Social Party">Social Party</option>
+                        <option value="Bootcamp">Bootcamp</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-montserrat font-bold uppercase block mb-1">URL Imagem de Capa do Evento</label>
+                    <input
+                      type="text"
+                      required
+                      value={eventGalleryForm.coverImage}
+                      onChange={(e) => setEventGalleryForm({ ...eventGalleryForm, coverImage: e.target.value })}
+                      placeholder="https://images.unsplash.com/..."
+                      className="w-full bg-black/20 border border-white/10 rounded-xl py-2.5 px-3.5 text-sm text-white focus:outline-none focus:border-[#f6c86b]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-montserrat font-bold uppercase block mb-1">Descrição Breve do Evento</label>
+                    <textarea
+                      rows={2}
+                      value={eventGalleryForm.description}
+                      onChange={(e) => setEventGalleryForm({ ...eventGalleryForm, description: e.target.value })}
+                      placeholder="Descrição dos destaques e momentos mágicos do evento..."
+                      className="w-full bg-black/20 border border-white/10 rounded-xl py-2.5 px-3.5 text-sm text-white focus:outline-none focus:border-[#f6c86b]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-montserrat font-bold uppercase block mb-1">URLs das Fotos (uma URL por linha)</label>
+                    <textarea
+                      rows={6}
+                      required
+                      value={eventGalleryForm.photosText}
+                      onChange={(e) => setEventGalleryForm({ ...eventGalleryForm, photosText: e.target.value })}
+                      placeholder="https://images.unsplash.com/photo-1...\nhttps://images.unsplash.com/photo-2..."
+                      className="w-full bg-black/20 border border-white/10 rounded-xl py-2.5 px-3.5 text-xs font-mono text-white focus:outline-none focus:border-[#f6c86b] leading-relaxed"
+                    />
+                    <p className="text-[10px] text-[#fff6da]/60 mt-1">Cole os links diretos das fotos para incluir na galeria do evento.</p>
+                  </div>
+
+                  <div className="pt-4 border-t border-white/5 text-right space-x-3">
+                    <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-bold uppercase tracking-wider">Cancelar</button>
+                    <button type="submit" className="px-6 py-2.5 bg-[#f6c86b] hover:bg-[#ffe6a6] text-[#3b3f3a] rounded-xl text-xs font-bold uppercase tracking-widest">Salvar Galeria</button>
                   </div>
                 </form>
               )}

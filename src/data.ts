@@ -48,6 +48,24 @@ export interface MediaItem {
   category: "Class Highlight" | "Performance" | "Social Dance" | "Workshop";
 }
 
+export interface EventGalleryPhoto {
+  id: string;
+  url: string;
+  title: string;
+  caption?: string;
+}
+
+export interface EventGalleryItem {
+  id: string;
+  title: string;
+  date: string;
+  location: string;
+  category: "Marathon" | "Festival" | "Workshop" | "Social Party" | "Aulas";
+  coverImage: string;
+  description: string;
+  photos: EventGalleryPhoto[];
+}
+
 export interface NewsItem {
   id: string;
   title: string;
@@ -249,6 +267,87 @@ export const mediaItems: MediaItem[] = [
     title: "Warmup Routine at Hong Kong Dance Academy",
     thumbnail: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=800",
     category: "Class Highlight"
+  }
+];
+
+export const eventGalleries: EventGalleryItem[] = [
+  {
+    id: "gal-1",
+    title: "Hainan Zouk Marathon 2026",
+    date: "12-16 de Novembro, 2026",
+    location: "West Coast Resort, Hainan Island",
+    category: "Marathon",
+    coverImage: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=1000",
+    description: "30+ horas de dança social à beira-mar, bailes tropicais ao pôr do sol, hospedagem em resort 5 estrelas e a melhor comunidade de Zouk da Ásia.",
+    photos: [
+      { id: "p-1", url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=1000", title: "Sunset Social Dance na Praia", caption: "Bailes no pôr do sol na praia tropical de Hainan" },
+      { id: "p-2", url: "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&q=80&w=1000", title: "Poolside Zouk Party", caption: "Festa na piscina com DJs internacionais de Zouk" },
+      { id: "p-3", url: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=1000", title: "Gala Dinner & Showcase", caption: "Jantar de gala e apresentações dos professores convidados" },
+      { id: "p-4", url: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=1000", title: "Ocean Deck Masterclass", caption: "Aulas de técnica e conexão com vista para o mar" },
+      { id: "p-5", url: "https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&q=80&w=1000", title: "Sunrise Connection Session", caption: "Dança contínua até o nascer do sol" },
+      { id: "p-6", url: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=1000", title: "Tropical Night Glow Party", caption: "Baile noturno com luzes neon e energia contagiante" }
+    ]
+  },
+  {
+    id: "gal-2",
+    title: "Hong Kong Zouk & Lambada Intensive",
+    date: "18 de Julho, 2026",
+    location: "Flow Dance Studio, Sheung Wan",
+    category: "Workshop",
+    coverImage: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=1000",
+    description: "Imersão de 5 horas com Xina e Laura focada em isolamentos corporais, giros contínuos de Lambada e movimentos de cabeça com segurança.",
+    photos: [
+      { id: "p-21", url: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=1000", title: "Treino de Movimentos de Cabeça", caption: "Postura e sustentação de core para cambrés seguros" },
+      { id: "p-22", url: "https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&q=80&w=1000", title: "Técnica de Giros de Lambada", caption: "Dinâmica e fluxo de quadril no ritmo contínuo" },
+      { id: "p-23", url: "https://images.unsplash.com/photo-1504609773096-104ff2c73ba4?auto=format&fit=crop&q=80&w=1000", title: "Conexão & Escuta Ativa", caption: "Prática em duplas com foco em resposta tátil" },
+      { id: "p-24", url: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=1000", title: "Energia em Grupo", caption: "Treino em roda e variação de condução" },
+      { id: "p-25", url: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80&w=1000", title: "Foto Final da Turma", caption: "Entrega dos certificados e confraternização" }
+    ]
+  },
+  {
+    id: "gal-3",
+    title: "Samba de Gafieira & Choro Party",
+    date: "01 de Agosto, 2026",
+    location: "YMCA Hong Kong, Tsim Sha Tsui",
+    category: "Social Party",
+    coverImage: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=1000",
+    description: "Autêntica noite social brasileira com música Choro ao vivo, aperitivos tradicionais e o charme do Samba de Gafieira.",
+    photos: [
+      { id: "p-31", url: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=1000", title: "Trio Acústico de Choro", caption: "Música ao vivo trazendo a ginga do Brasil para Hong Kong" },
+      { id: "p-32", url: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=1000", title: "Malandragem & Postura no Samba", caption: "Condução elegante e passos característicos da Gafieira" },
+      { id: "p-33", url: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=1000", title: "Atmosfera Acolhedora", caption: "Comunidade reunida para celebrar a dança" },
+      { id: "p-34", url: "https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&q=80&w=1000", title: "Salão de Dança Animado", caption: "Casais praticando variações e ritmo" }
+    ]
+  },
+  {
+    id: "gal-4",
+    title: "Zouk Connection International Festival",
+    date: "Maio de 2026",
+    location: "Hong Kong Convention Centre",
+    category: "Festival",
+    coverImage: "https://images.unsplash.com/photo-1518834107812-67b0b7c58434?auto=format&fit=crop&q=80&w=1000",
+    description: "Mostra de dança no palco principal, professores internacionais convidados e bailes épicos até o raiar do dia.",
+    photos: [
+      { id: "p-41", url: "https://images.unsplash.com/photo-1518834107812-67b0b7c58434?auto=format&fit=crop&q=80&w=1000", title: "Apresentação no Palco Principal", caption: "Coreografia dos fundadores Xina & Laura" },
+      { id: "p-42", url: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=1000", title: "Showcase dos Artistas Convidados", caption: "Performances de alto nível internacional" },
+      { id: "p-43", url: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&q=80&w=1000", title: "Final do Competição Jack & Jill", caption: "Improviso emocionante com sorteio de pares" },
+      { id: "p-44", url: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=1000", title: "Baile Noturno no Salão Principal", caption: "Centenas de dançarinos celebrando o Zouk" }
+    ]
+  },
+  {
+    id: "gal-5",
+    title: "Aulas Semanais & Práticas Guiadas 2inDance",
+    date: "Junho / Julho, 2026",
+    location: "Hong Kong Dance Academy, Central",
+    category: "Aulas",
+    coverImage: "https://images.unsplash.com/photo-1504609773096-104ff2c73ba4?auto=format&fit=crop&q=80&w=1000",
+    description: "Acompanhe a energia dos nossos treinos semanais de Lambada, Zouk Iniciante, Intermediário e Avançado em Central.",
+    photos: [
+      { id: "p-51", url: "https://images.unsplash.com/photo-1504609773096-104ff2c73ba4?auto=format&fit=crop&q=80&w=1000", title: "Rodízio de Pares na Aula", caption: "Rotação contínua para aprendizado dinâmico" },
+      { id: "p-52", url: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=1000", title: "Exercício de Musicalidade", caption: "Sintonia com o ritmo e pausas da música" },
+      { id: "p-53", url: "https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&q=80&w=1000", title: "Prática Guiada Pós-Aula", caption: "Espaço aberto para tirar dúvidas e praticar" },
+      { id: "p-54", url: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=1000", title: "Orientação Individual dos Professores", caption: "Correção atenciosa de postura e mecânica" }
+    ]
   }
 ];
 

@@ -11,6 +11,7 @@ import {
   weeklySchedule, 
   upcomingEvents, 
   mediaItems, 
+  eventGalleries,
   newsItems 
 } from "./src/data";
 
@@ -114,6 +115,7 @@ let localAbout = { ...aboutContent };
 let localSchedule = [...weeklySchedule];
 let localEvents = [...upcomingEvents];
 let localMedia = [...mediaItems];
+let localEventGalleries = [...eventGalleries];
 let localNews = [...newsItems];
 let localSubmissions: any[] = [];
 let localFrontpage = {
@@ -229,6 +231,20 @@ async function initializeDatabase(conn: mysql.PoolConnection) {
         thumbnail VARCHAR(500) NOT NULL,
         url VARCHAR(500),
         category VARCHAR(100) NOT NULL
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    // 6.5. Create Event Galleries table
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS site_event_galleries (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        date VARCHAR(100) NOT NULL,
+        location VARCHAR(255) NOT NULL,
+        category VARCHAR(100) NOT NULL,
+        coverImage VARCHAR(500) NOT NULL,
+        description TEXT NOT NULL,
+        photos LONGTEXT NOT NULL
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
 
@@ -935,6 +951,83 @@ app.delete("/api/media/:id", async (req, res) => {
       await dbPool.query("DELETE FROM site_media_items WHERE id = ?", [id]);
     } else {
       localMedia = localMedia.filter(item => item.id !== id);
+    }
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+
+// 6.5 EVENT GALLERIES API
+app.get("/api/event-galleries", async (req, res) => {
+  try {
+    const dbPool = await getDbPool();
+    if (!dbPool) {
+      res.json(localEventGalleries);
+      return;
+    }
+    const [rows] = await dbPool.query("SELECT * FROM site_event_galleries ORDER BY id DESC");
+    const parsedRows = (rows as any[]).map(r => ({
+      ...r,
+      photos: typeof r.photos === 'string' ? JSON.parse(r.photos) : (r.photos || [])
+    }));
+    res.json(parsedRows.length > 0 ? parsedRows : localEventGalleries);
+  } catch (err) {
+    res.json(localEventGalleries);
+  }
+});
+
+app.post("/api/event-galleries", async (req, res) => {
+  const { title, date, location, category, coverImage, description, photos } = req.body;
+  try {
+    const dbPool = await getDbPool();
+    if (dbPool) {
+      const photosJson = JSON.stringify(photos || []);
+      const [result] = await dbPool.query(`
+        INSERT INTO site_event_galleries (title, date, location, category, coverImage, description, photos)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `, [title, date, location, category, coverImage, description, photosJson]);
+      res.json({ success: true, id: (result as any).insertId });
+    } else {
+      const newItem = { id: "gal-" + Date.now(), title, date, location, category, coverImage, description, photos: photos || [] };
+      localEventGalleries.unshift(newItem as any);
+      res.json({ success: true, id: newItem.id });
+    }
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.put("/api/event-galleries/:id", async (req, res) => {
+  const { id } = req.params;
+  const { title, date, location, category, coverImage, description, photos } = req.body;
+  try {
+    const dbPool = await getDbPool();
+    if (dbPool) {
+      const photosJson = JSON.stringify(photos || []);
+      await dbPool.query(`
+        UPDATE site_event_galleries SET title = ?, date = ?, location = ?, category = ?, coverImage = ?, description = ?, photos = ?
+        WHERE id = ?
+      `, [title, date, location, category, coverImage, description, photosJson, id]);
+      res.json({ success: true });
+    } else {
+      localEventGalleries = localEventGalleries.map(item => item.id === id ? { id, title, date, location, category, coverImage, description, photos: photos || [] } as any : item);
+      res.json({ success: true });
+    }
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.delete("/api/event-galleries/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const dbPool = await getDbPool();
+    if (dbPool) {
+      await dbPool.query("DELETE FROM site_event_galleries WHERE id = ?", [id]);
+    } else {
+      localEventGalleries = localEventGalleries.filter(item => item.id !== id);
     }
     res.json({ success: true });
   } catch (err: any) {
