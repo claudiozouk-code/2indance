@@ -19,7 +19,38 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 
-app.use(express.json());
+// Enable Trust Proxy for reverse proxies (Cloud Run, Hostinger, Nginx, Cloudflare)
+app.set("trust proxy", 1);
+
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
+
+// Security & HTTPS Enforcement Middleware
+app.use((req, res, next) => {
+  // Automatically redirect HTTP to HTTPS when behind reverse proxy
+  if (req.headers["x-forwarded-proto"] === "http") {
+    return res.redirect(301, `https://${req.headers.host}${req.url}`);
+  }
+
+  // Security Headers for Browser Trust & SSL Enforcement
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+  
+  // Upgrade-Insecure-Requests automatically converts any http:// image/script to https://
+  res.setHeader("Content-Security-Policy", "upgrade-insecure-requests;");
+  
+  // Strict Transport Security (HSTS)
+  res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  
+  // Prevent MIME sniffing
+  res.setHeader("X-Content-Type-Options", "nosniff");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 // Database connection configuration targeting Hostinger Remote MySQL
 const dbConfig = {

@@ -1,0 +1,41 @@
+# =====================================================================
+# 2inDance - Hostinger / Apache Security & HTTPS Configuration
+# Fixes "Conexão Não Segura" / Non-Secure Connection Warnings
+# =====================================================================
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # 1. Force HTTPS Redirection (Solves Insecure Connection Warnings)
+  RewriteCond %{HTTPS} off [OR]
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # 2. Allow direct access to existing files & directories
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # 3. Route all SPA client routes to index.html
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# =====================================================================
+# Security & SSL Headers
+# =====================================================================
+<IfModule mod_headers.c>
+  # Automatically upgrade all HTTP calls (images, scripts) to HTTPS
+  Header set Content-Security-Policy "upgrade-insecure-requests"
+
+  # Enforce Strict Transport Security (HSTS)
+  Header set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+  # Enable Cross-Origin Resource Sharing (CORS)
+  Header set Access-Control-Allow-Origin "*"
+  Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+  Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+
+  # Prevent MIME Sniffing
+  Header set X-Content-Type-Options "nosniff"
+</IfModule>
