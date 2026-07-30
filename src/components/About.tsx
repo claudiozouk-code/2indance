@@ -18,42 +18,38 @@ export default function About() {
   }, []);
 
   return (
-    <section id="about" className="py-20 md:py-28 bg-gradient-to-br from-[#FFFDF9] via-[#FAF5EA] to-[#FFF0D4]/70 text-[#3b3f3a] relative overflow-hidden border-t border-[#9bb08a]/25">
-      {/* 1. Fluid Topographic Dance Path Waves */}
-      <div className="absolute inset-0 opacity-[0.08] pointer-events-none">
+    <section id="about" className="py-16 md:py-24 bg-gradient-to-br from-[#FFFDF9] via-[#FAF5EA] to-[#FFF0D4]/70 text-[#3b3f3a] relative overflow-hidden border-t border-[#9bb08a]/25">
+      {/* 1. Fluid Topographic Dance Path Waves (Static SVG for zero scroll repaint lag) */}
+      <div className="absolute inset-0 opacity-[0.06] pointer-events-none">
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 800" fill="none" preserveAspectRatio="none">
-          <motion.path 
+          <path 
             d="M -100,200 C 300,100 500,400 800,250 C 1100,100 1300,350 1600,200" 
             stroke="#9bb08a" 
-            strokeWidth="3" 
+            strokeWidth="2.5" 
             strokeDasharray="8 8"
-            animate={{ strokeDashoffset: [0, -40] }}
-            transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
           />
-          <motion.path 
+          <path 
             d="M -50,350 C 400,200 600,600 900,450 C 1200,300 1400,500 1700,350" 
             stroke="#f6c86b" 
             strokeWidth="2" 
-            animate={{ strokeDashoffset: [0, 40] }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           />
           <path d="M -200,500 C 250,300 450,700 750,550 C 1050,400 1250,600 1550,500" stroke="#3b3f3a" strokeWidth="1.5" strokeOpacity="0.5" />
         </svg>
       </div>
 
-      {/* Background decorations */}
-      <div className="absolute top-1/4 right-[-5%] w-[40vw] h-[40vw] bg-[#9bb08a]/12 rounded-full blur-[130px] pointer-events-none" />
-      <div className="absolute bottom-10 left-[-5%] w-[35vw] h-[35vw] bg-[#f6c86b]/15 rounded-full blur-[110px] pointer-events-none" />
+      {/* Lightweight background decorations without GPU-heavy blur values */}
+      <div className="absolute top-1/4 right-[-5%] w-[35vw] h-[35vw] bg-[#9bb08a]/10 rounded-full blur-2xl pointer-events-none" />
+      <div className="absolute bottom-10 left-[-5%] w-[30vw] h-[30vw] bg-[#f6c86b]/12 rounded-full blur-2xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
         <motion.div 
-          initial={{ opacity: 0, y: -40 }}
+          initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.15 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center max-w-3xl mx-auto mb-16 md:mb-20"
+          viewport={{ once: true, amount: 0.1 }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center max-w-3xl mx-auto mb-12 md:mb-16"
         >
           <div className="inline-flex items-center space-x-2 bg-[#3b3f3a]/5 border border-[#3b3f3a]/10 px-3.5 py-1.5 rounded-full mb-4">
             <Sparkles className="w-3.5 h-3.5 text-[#f6c86b]" />
@@ -70,14 +66,14 @@ export default function About() {
         </motion.div>
 
         {/* Story Section & School philosophy */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center mb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center mb-16">
           
           {/* Left: Philosophy & story */}
           <motion.div 
-            initial={{ opacity: 0, x: -60 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: false, amount: 0.15 }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-7 space-y-6"
           >
             <span className="font-montserrat text-xs font-bold uppercase tracking-wider text-[#9bb08a]">
@@ -117,16 +113,16 @@ export default function About() {
 
           {/* Right: Stats Grid */}
           <motion.div 
-            initial={{ opacity: 0, x: 60 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: false, amount: 0.15 }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-5 grid grid-cols-2 gap-4"
           >
             {content.stats?.map((stat, idx) => (
               <div
                 key={idx}
-                className="bg-[#ffe6a6]/40 border border-[#9bb08a]/10 p-6 rounded-2xl shadow-sm text-center flex flex-col justify-center items-center group hover:bg-[#ffe6a6]/60 transition-all duration-300"
+                className="bg-[#ffe6a6]/40 border border-[#9bb08a]/10 p-6 rounded-2xl shadow-sm text-center flex flex-col justify-center items-center group hover:bg-[#ffe6a6]/60 transition-colors duration-200"
               >
                 <span className="font-display text-4.5xl font-extrabold text-[#3b3f3a]">
                   {stat.num}
@@ -141,13 +137,13 @@ export default function About() {
         </div>
 
         {/* Founders Grid */}
-        <div className="mt-20">
+        <div className="mt-16">
           <motion.div 
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.15 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="text-center mb-12"
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="text-center mb-10"
           >
             <span className="font-montserrat text-xs font-bold uppercase tracking-widest text-[#9bb08a] bg-[#9bb08a]/10 px-3.5 py-1.5 rounded-full border border-[#9bb08a]/20">
               The Founders & Master Instructors
@@ -160,7 +156,7 @@ export default function About() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
             {content.founders?.map((founder: any, idx: number) => {
               const defaultSpecialties = founder.name.toLowerCase().includes("xina")
                 ? ["Brazilian Zouk", "Classic Lambada", "Biomechanics & Technique", "Body Isolations"]
@@ -181,11 +177,11 @@ export default function About() {
               return (
                 <motion.div
                   key={founder.id || idx}
-                  initial={{ opacity: 0, y: 40 }}
+                  initial={{ opacity: 0, y: 15 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: false, amount: 0.15 }}
-                  transition={{ duration: 0.8, delay: idx * 0.15, ease: [0.16, 1, 0.3, 1] }}
-                  className="bg-white/80 backdrop-blur-md border border-[#9bb08a]/25 rounded-3xl overflow-hidden shadow-lg group hover:shadow-2xl transition-all duration-300 flex flex-col justify-between"
+                  viewport={{ once: true, amount: 0.1 }}
+                  transition={{ duration: 0.35, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                  className="bg-white/95 border border-[#9bb08a]/25 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col justify-between"
                 >
                   <div>
                     {/* Top Hero Image Banner */}
@@ -194,12 +190,12 @@ export default function About() {
                         src={founder.image}
                         alt={`${founder.name} - Co-Founder of 2inDance`}
                         referrerPolicy="no-referrer"
-                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+                        className="w-full h-full object-cover object-center"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#3b3f3a] via-[#3b3f3a]/30 to-transparent" />
                       
                       {/* Floating Badge */}
-                      <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full border border-black/5 shadow-md flex items-center space-x-1.5">
+                      <div className="absolute top-4 left-4 bg-white/95 px-3 py-1 rounded-full border border-black/5 shadow-sm flex items-center space-x-1.5">
                         <Star className="w-3.5 h-3.5 text-[#f6c86b] fill-[#f6c86b]" />
                         <span className="font-montserrat text-[10px] font-bold uppercase tracking-wider text-[#3b3f3a]">
                           {founder.role || "Co-Founder & Lead Instructor"}
@@ -263,7 +259,7 @@ export default function About() {
                           href={socials.instagram}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-2.5 bg-white rounded-xl border border-[#3b3f3a]/10 hover:border-[#f6c86b] text-[#3b3f3a] hover:text-[#e1306c] hover:bg-[#ffe6a6]/20 transition-all duration-300 shadow-sm"
+                          className="p-2.5 bg-white rounded-xl border border-[#3b3f3a]/10 hover:border-[#f6c86b] text-[#3b3f3a] hover:text-[#e1306c] hover:bg-[#ffe6a6]/20 transition-all duration-200 shadow-sm"
                           title={`${founder.name} on Instagram`}
                         >
                           <Instagram className="w-4 h-4" />
@@ -274,7 +270,7 @@ export default function About() {
                           href={socials.facebook}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-2.5 bg-white rounded-xl border border-[#3b3f3a]/10 hover:border-[#f6c86b] text-[#3b3f3a] hover:text-[#1877f2] hover:bg-[#ffe6a6]/20 transition-all duration-300 shadow-sm"
+                          className="p-2.5 bg-white rounded-xl border border-[#3b3f3a]/10 hover:border-[#f6c86b] text-[#3b3f3a] hover:text-[#1877f2] hover:bg-[#ffe6a6]/20 transition-all duration-200 shadow-sm"
                           title={`${founder.name} on Facebook`}
                         >
                           <Facebook className="w-4 h-4" />
@@ -285,7 +281,7 @@ export default function About() {
                           href={socials.youtube}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-2.5 bg-white rounded-xl border border-[#3b3f3a]/10 hover:border-[#f6c86b] text-[#3b3f3a] hover:text-[#ff0000] hover:bg-[#ffe6a6]/20 transition-all duration-300 shadow-sm"
+                          className="p-2.5 bg-white rounded-xl border border-[#3b3f3a]/10 hover:border-[#f6c86b] text-[#3b3f3a] hover:text-[#ff0000] hover:bg-[#ffe6a6]/20 transition-all duration-200 shadow-sm"
                           title={`${founder.name} on YouTube`}
                         >
                           <Youtube className="w-4 h-4" />
@@ -296,7 +292,7 @@ export default function About() {
                           href={socials.whatsapp}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-2.5 bg-white rounded-xl border border-[#3b3f3a]/10 hover:border-[#f6c86b] text-[#3b3f3a] hover:text-[#25d366] hover:bg-[#ffe6a6]/20 transition-all duration-300 shadow-sm"
+                          className="p-2.5 bg-white rounded-xl border border-[#3b3f3a]/10 hover:border-[#f6c86b] text-[#3b3f3a] hover:text-[#25d366] hover:bg-[#ffe6a6]/20 transition-all duration-200 shadow-sm"
                           title={`WhatsApp ${founder.name}`}
                         >
                           <MessageCircle className="w-4 h-4" />
@@ -306,7 +302,7 @@ export default function About() {
 
                     <a
                       href="#contact"
-                      className="inline-flex items-center space-x-1.5 bg-[#3b3f3a] hover:bg-[#f6c86b] text-white hover:text-[#3b3f3a] px-4 py-2.5 rounded-xl text-xs font-montserrat font-bold uppercase tracking-wider transition-all duration-300 shadow-md"
+                      className="inline-flex items-center space-x-1.5 bg-[#3b3f3a] hover:bg-[#f6c86b] text-white hover:text-[#3b3f3a] px-4 py-2.5 rounded-xl text-xs font-montserrat font-bold uppercase tracking-wider transition-all duration-200 shadow-md"
                     >
                       <span>Book Class with {founder.name}</span>
                       <ExternalLink className="w-3.5 h-3.5" />
@@ -320,13 +316,13 @@ export default function About() {
 
         {/* Signature Quote */}
         <motion.div 
-          initial={{ opacity: 0, scale: 0.92, y: 30 }}
-          whileInView={{ opacity: 1, scale: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.15 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-16 bg-[#3b3f3a] text-[#fff6da] p-8 md:p-10 rounded-3xl relative overflow-hidden shadow-lg border border-[#9bb08a]/10 max-w-4xl mx-auto"
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.1 }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="mt-14 bg-[#3b3f3a] text-[#fff6da] p-8 md:p-10 rounded-3xl relative overflow-hidden shadow-md border border-[#9bb08a]/10 max-w-4xl mx-auto"
         >
-          <div className="absolute top-[-20px] left-[-10px] w-40 h-40 bg-[#f6c86b]/5 rounded-full blur-[30px] pointer-events-none" />
+          <div className="absolute top-[-20px] left-[-10px] w-32 h-32 bg-[#f6c86b]/5 rounded-full blur-xl pointer-events-none" />
           <span className="absolute top-2 left-6 font-display text-7xl text-[#f6c86b]/10 select-none">“</span>
           
           <p className="font-display italic text-base sm:text-lg text-[#fff6da]/90 relative z-10 leading-relaxed font-light text-center max-w-2xl mx-auto">

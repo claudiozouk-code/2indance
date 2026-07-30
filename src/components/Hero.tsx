@@ -85,179 +85,59 @@ export default function Hero() {
           : { backgroundColor: "#3b3f3a" }
       }
     >
-      {/* 1. Ambient Background Glows representing Connection (Lead & Follow) */}
-      <motion.div
-        animate={{
-          x: [0, 40, -40, 20, 0],
-          y: [0, -50, 40, -20, 0],
-          scale: [1, 1.1, 0.95, 1.05, 1],
-        }}
-        transition={{
-          duration: 20,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-[#f6c86b]/10 blur-[130px] rounded-full pointer-events-none"
-      />
+      {/* 1. Ambient Background Glows */}
+      <div className="absolute top-[-5%] left-[-5%] w-[45vw] h-[45vw] bg-[#f6c86b]/10 blur-2xl rounded-full pointer-events-none" />
+      <div className="absolute bottom-[-5%] right-[-5%] w-[45vw] h-[45vw] bg-[#9bb08a]/15 blur-2xl rounded-full pointer-events-none" />
 
-      <motion.div
-        animate={{
-          x: [0, -40, 40, -20, 0],
-          y: [0, 50, -40, 20, 0],
-          scale: [1, 0.95, 1.1, 0.9, 1],
-        }}
-        transition={{
-          duration: 24,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-[#9bb08a]/20 blur-[130px] rounded-full pointer-events-none"
-      />
-
-      {/* 2. 3D Flowing Dance Ribbon Lines (Representing social dance movement & fluid connection paths) */}
+      {/* 2. Flowing Ribbon Lines (Lightweight vector paths without GPU-heavy Gaussian blur filters) */}
       {frontpage.hero_bg_type !== "image" && (
-        <div 
-          className="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center" 
-          style={{ perspective: "1200px" }}
-        >
-        <motion.div
-          style={{ transformStyle: "preserve-3d" }}
-          animate={{
-            rotateX: [12, 28, 8, 12],
-            rotateY: [-22, -8, -32, -22],
-            rotateZ: [0, 360],
-          }}
-          transition={{
-            duration: 40,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          className="relative w-[150vw] h-[150vw] sm:w-[100vw] sm:h-[100vw] flex items-center justify-center opacity-35"
-        >
-          {/* SVG Containing the morphing 3D Ribbon Paths */}
-          <svg
-            viewBox="0 0 800 800"
-            className="w-full h-full absolute"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              <linearGradient id="ribbonGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#f6c86b" stopOpacity="0.8" />
-                <stop offset="50%" stopColor="#ffe6a6" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#9bb08a" stopOpacity="0.9" />
-              </linearGradient>
-              <linearGradient id="ribbonGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#9bb08a" stopOpacity="0.7" />
-                <stop offset="50%" stopColor="#fff6da" stopOpacity="0.5" />
-                <stop offset="100%" stopColor="#f6c86b" stopOpacity="0.8" />
-              </linearGradient>
-              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="8" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
-            </defs>
+        <div className="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center">
+          <div className="relative w-[120vw] h-[120vw] sm:w-[90vw] sm:h-[90vw] flex items-center justify-center opacity-25">
+            <svg
+              viewBox="0 0 800 800"
+              className="w-full h-full absolute"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <linearGradient id="ribbonGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#f6c86b" stopOpacity="0.8" />
+                  <stop offset="50%" stopColor="#ffe6a6" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="#9bb08a" stopOpacity="0.9" />
+                </linearGradient>
+                <linearGradient id="ribbonGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#9bb08a" stopOpacity="0.7" />
+                  <stop offset="50%" stopColor="#fff6da" stopOpacity="0.5" />
+                  <stop offset="100%" stopColor="#f6c86b" stopOpacity="0.8" />
+                </linearGradient>
+              </defs>
 
-            {/* Path 1: Infinite Flow Loop representing couple spinning */}
-            <motion.path
-              d="M 100 400 C 100 150, 300 100, 400 400 C 500 700, 700 650, 700 400 C 700 150, 500 100, 400 400 C 300 700, 100 650, 100 400 Z"
-              stroke="url(#ribbonGrad1)"
-              strokeWidth="2.5"
-              strokeDasharray="1200"
-              animate={{
-                strokeDashoffset: [1200, 0],
-              }}
-              transition={{
-                duration: 18,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-              filter="url(#glow)"
-            />
+              {/* Path 1: Infinite Flow Loop */}
+              <path
+                d="M 100 400 C 100 150, 300 100, 400 400 C 500 700, 700 650, 700 400 C 700 150, 500 100, 400 400 C 300 700, 100 650, 100 400 Z"
+                stroke="url(#ribbonGrad1)"
+                strokeWidth="2"
+                className="opacity-70"
+              />
 
-            {/* Path 2: Secondary orbiting helper wave path */}
-            <motion.path
-              d="M 400 100 C 150 100, 100 300, 400 400 C 700 500, 650 700, 400 700 C 150 700, 200 500, 400 400 C 600 300, 650 100, 400 100 Z"
-              stroke="url(#ribbonGrad2)"
-              strokeWidth="1.5"
-              strokeDasharray="1400"
-              animate={{
-                strokeDashoffset: [0, -1400],
-              }}
-              transition={{
-                duration: 22,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-              filter="url(#glow)"
-              className="opacity-80"
-            />
+              {/* Path 2: Secondary wave path */}
+              <path
+                d="M 400 100 C 150 100, 100 300, 400 400 C 700 500, 650 700, 400 700 C 150 700, 200 500, 400 400 C 600 300, 650 100, 400 100 Z"
+                stroke="url(#ribbonGrad2)"
+                strokeWidth="1.5"
+                className="opacity-50"
+              />
 
-            {/* Path 3: Inner tight spin trajectory */}
-            <motion.path
-              d="M 250 400 C 250 280, 350 250, 400 400 C 450 550, 550 520, 550 400 C 550 280, 450 250, 400 400 C 350 550, 250 520, 250 400 Z"
-              stroke="url(#ribbonGrad1)"
-              strokeWidth="1"
-              strokeDasharray="800"
-              animate={{
-                strokeDashoffset: [0, 800],
-              }}
-              transition={{
-                duration: 14,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-              className="opacity-60"
-            />
-
-            {/* Path 4: Outer giant sweeping atmospheric curve */}
-            <motion.path
-              d="M 50 400 Q 400 -100 750 400 Q 400 900 50 400"
-              stroke="url(#ribbonGrad2)"
-              strokeWidth="2"
-              strokeDasharray="1600"
-              animate={{
-                strokeDashoffset: [1600, 0],
-              }}
-              transition={{
-                duration: 28,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-              filter="url(#glow)"
-              className="opacity-50"
-            />
-          </svg>
-
-          {/* 3D floating nodes/dancers moving in space */}
-          <motion.div
-            style={{ translateZ: "80px" }}
-            className="absolute w-4 h-4 rounded-full bg-[#f6c86b] shadow-[0_0_15px_#f6c86b]"
-            animate={{
-              x: [-150, 150, 80, -150],
-              y: [-120, 80, -160, -120],
-            }}
-            transition={{
-              duration: 12,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-          <motion.div
-            style={{ translateZ: "-60px" }}
-            className="absolute w-3 h-3 rounded-full bg-[#9bb08a] shadow-[0_0_12px_#9bb08a]"
-            animate={{
-              x: [180, -120, -50, 180],
-              y: [100, -150, 120, 100],
-            }}
-            transition={{
-              duration: 15,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-        </motion.div>
-      </div>
+              {/* Path 3: Outer curve */}
+              <path
+                d="M 50 400 Q 400 -100 750 400 Q 400 900 50 400"
+                stroke="url(#ribbonGrad2)"
+                strokeWidth="1.5"
+                className="opacity-40"
+              />
+            </svg>
+          </div>
+        </div>
       )}
 
       {/* 3. Subtle grid overlay */}

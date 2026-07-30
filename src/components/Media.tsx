@@ -175,11 +175,12 @@ export default function Media() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Header Section */}
-        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
           <motion.div 
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.3 }}
             className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-[#f6c86b]/20 border border-[#f6c86b]/40 text-[#3b3f3a] text-xs font-montserrat font-bold uppercase tracking-widest mb-4 shadow-sm"
           >
             <Camera className="w-4 h-4 text-[#3b3f3a]" />
@@ -187,9 +188,10 @@ export default function Media() {
           </motion.div>
 
           <motion.h2 
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.35 }}
             className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-[#3b3f3a] tracking-tight"
           >
             Nossas Galerias de Eventos
@@ -198,22 +200,23 @@ export default function Media() {
           <motion.p 
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="font-sans text-sm sm:text-base text-[#3b3f3a]/75 mt-4 font-light leading-relaxed"
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.35 }}
+            className="font-sans text-sm sm:text-base text-[#3b3f3a]/75 mt-3 font-light leading-relaxed"
           >
             Clique na <strong className="font-semibold text-[#3b3f3a]">imagem de capa</strong> de qualquer evento para abrir a galeria completa em formato modal moderno com fotos em alta definição.
           </motion.p>
 
           {/* Category Filter Pills */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mt-8">
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-xl text-xs font-montserrat font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                className={`px-4 py-2 rounded-xl text-xs font-montserrat font-bold uppercase tracking-wider transition-colors cursor-pointer ${
                   selectedCategory === category
-                    ? "bg-[#3b3f3a] text-[#fff6da] shadow-md shadow-[#3b3f3a]/20 scale-105"
-                    : "bg-white/70 text-[#3b3f3a]/80 hover:bg-white hover:text-[#3b3f3a] border border-[#9bb08a]/20"
+                    ? "bg-[#3b3f3a] text-[#fff6da] shadow-md shadow-[#3b3f3a]/20"
+                    : "bg-white/80 text-[#3b3f3a]/80 hover:bg-white hover:text-[#3b3f3a] border border-[#9bb08a]/20"
                 }`}
               >
                 {category}
@@ -228,12 +231,12 @@ export default function Media() {
             {filteredGalleries.map((gallery, idx) => (
               <motion.div
                 key={gallery.id || idx}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: idx * 0.08 }}
+                viewport={{ once: true, amount: 0.1 }}
+                transition={{ duration: 0.3, delay: idx * 0.05 }}
                 onClick={() => openGalleryModal(gallery)}
-                className="group relative bg-white rounded-3xl overflow-hidden border border-[#9bb08a]/25 shadow-xl hover:shadow-2xl hover:shadow-[#3b3f3a]/15 transition-all duration-300 cursor-pointer flex flex-col justify-between"
+                className="group relative bg-white rounded-3xl overflow-hidden border border-[#9bb08a]/25 shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer flex flex-col justify-between"
               >
                 {/* Cover Image Container */}
                 <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#2a2d29]">
@@ -241,7 +244,7 @@ export default function Media() {
                     src={gallery.coverImage}
                     alt={gallery.title}
                     referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
+                    className="w-full h-full object-cover group-hover:scale-104 transition-transform duration-500 ease-out"
                   />
                   
                   {/* Subtle Gradient Overlay */}
@@ -252,15 +255,15 @@ export default function Media() {
                     <span className="bg-[#f6c86b] text-[#3b3f3a] font-montserrat text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full shadow-md">
                       {gallery.category}
                     </span>
-                    <span className="bg-black/60 backdrop-blur-md text-[#fff6da] font-mono text-[11px] font-medium px-2.5 py-1 rounded-full border border-white/20 flex items-center space-x-1.5 shadow-md">
+                    <span className="bg-black/60 text-[#fff6da] font-mono text-[11px] font-medium px-2.5 py-1 rounded-full border border-white/20 flex items-center space-x-1.5 shadow-md">
                       <Camera className="w-3.5 h-3.5 text-[#f6c86b]" />
                       <span>{gallery.photos?.length || 0} Fotos</span>
                     </span>
                   </div>
 
                   {/* Hover Open Gallery Button Overlay */}
-                  <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-[2px]">
-                    <span className="px-5 py-2.5 rounded-full bg-[#f6c86b] text-[#3b3f3a] font-montserrat text-xs font-bold uppercase tracking-wider shadow-2xl flex items-center space-x-2 transform translate-y-2 group-hover:translate-y-0 transition-transform">
+                  <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black/40">
+                    <span className="px-5 py-2.5 rounded-full bg-[#f6c86b] text-[#3b3f3a] font-montserrat text-xs font-bold uppercase tracking-wider shadow-lg flex items-center space-x-2">
                       <span>Abrir Galeria Full Screen</span>
                       <ArrowRight className="w-4 h-4" />
                     </span>
@@ -338,24 +341,25 @@ export default function Media() {
                 <motion.div
                   key={vid.id || idx}
                   onClick={() => setActiveVideo(vid)}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 15 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="group relative bg-white rounded-3xl overflow-hidden border border-[#9bb08a]/20 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+                  viewport={{ once: true, amount: 0.1 }}
+                  transition={{ duration: 0.3, delay: idx * 0.05 }}
+                  className="group relative bg-white rounded-3xl overflow-hidden border border-[#9bb08a]/20 shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer"
                 >
                   <div className="relative aspect-video w-full bg-[#181a18] overflow-hidden">
                     <img
                       src={vid.thumbnail}
                       alt={vid.title}
                       referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                      <div className="w-14 h-14 bg-[#f6c86b] rounded-full flex items-center justify-center text-[#3b3f3a] shadow-xl group-hover:scale-110 transition-transform">
+                      <div className="w-14 h-14 bg-[#f6c86b] rounded-full flex items-center justify-center text-[#3b3f3a] shadow-lg group-hover:scale-105 transition-transform">
                         <Play className="w-6 h-6 fill-current ml-0.5" />
                       </div>
                     </div>
-                    <span className="absolute top-3 left-3 bg-black/60 backdrop-blur-md text-white text-[10px] font-montserrat font-bold uppercase px-2.5 py-1 rounded-full">
+                    <span className="absolute top-3 left-3 bg-black/70 text-white text-[10px] font-montserrat font-bold uppercase px-2.5 py-1 rounded-full">
                       {vid.category}
                     </span>
                   </div>

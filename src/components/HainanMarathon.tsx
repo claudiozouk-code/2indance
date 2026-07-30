@@ -58,31 +58,27 @@ export default function HainanMarathon() {
       id="hainan" 
       className="py-16 md:py-24 bg-gradient-to-b from-[#111e17] via-[#1c2e24] to-[#2b2f2d] text-[#fff6da] relative overflow-hidden border-t border-[#9bb08a]/20"
     >
-      {/* Tropical Floating Palm leaves & waves vector decorations */}
+      {/* Tropical Floating Palm leaves & waves vector decorations (Static for scroll performance) */}
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1000" fill="none" preserveAspectRatio="none">
-          <motion.path 
+          <path 
             d="M -100,200 C 200,100 400,300 700,200 C 1000,100 1200,300 1500,200" 
             stroke="#f6c86b" 
             strokeWidth="3" 
             strokeDasharray="8 8"
-            animate={{ strokeDashoffset: [0, -40] }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           />
-          <motion.path 
+          <path 
             d="M -50,600 C 350,500 550,750 850,650 C 1150,550 1350,750 1650,650" 
             stroke="#9bb08a" 
             strokeWidth="2.5" 
-            animate={{ strokeDashoffset: [0, 40] }}
-            transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
           />
         </svg>
       </div>
 
-      {/* Decorative Radial Glowing Orbs resembling tropical sun & sea breeze */}
-      <div className="absolute top-10 left-10 w-[45vw] h-[45vw] bg-[#f6c86b]/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute top-[40%] right-[-10%] w-[35vw] h-[35vw] bg-[#9bb08a]/15 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-10 left-[20%] w-[40vw] h-[40vw] bg-cyan-500/5 rounded-full blur-[130px] pointer-events-none" />
+      {/* Lightweight Decorative Radial Glowing Orbs */}
+      <div className="absolute top-10 left-10 w-[35vw] h-[35vw] bg-[#f6c86b]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-[40%] right-[-10%] w-[30vw] h-[30vw] bg-[#9bb08a]/12 rounded-full blur-2xl pointer-events-none" />
+      <div className="absolute bottom-10 left-[20%] w-[35vw] h-[35vw] bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
