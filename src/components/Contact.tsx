@@ -91,13 +91,7 @@ export default function Contact({ selectedClass = "" }: ContactProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: -40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.15 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center max-w-3xl mx-auto mb-16 md:mb-20"
-        >
+        <div className="text-center max-w-3xl mx-auto mb-16 md:mb-20">
           <div className="inline-flex items-center space-x-2 bg-[#3b3f3a]/5 border border-[#3b3f3a]/10 px-3.5 py-1.5 rounded-full mb-4">
             <Sparkles className="w-3.5 h-3.5 text-[#f6c86b]" />
             <span className="font-montserrat text-[10px] font-bold tracking-widest text-[#3b3f3a]/80 uppercase">
@@ -110,19 +104,13 @@ export default function Contact({ selectedClass = "" }: ContactProps) {
           <p className="font-sans text-sm sm:text-base text-[#3b3f3a]/75 font-light">
             Ready to learn Brazilian Zouk, Lambada, or Samba de Gafieira? Have questions? Contact Xina and Laura directly!
           </p>
-        </motion.div>
+        </div>
 
         {/* 2-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
           
           {/* Left Column: Contact Details & FAQ */}
-          <motion.div 
-            initial={{ opacity: 0, x: -35 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: false, amount: 0.1 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-5 space-y-10"
-          >
+          <div className="lg:col-span-5 space-y-10">
             
             {/* Quick Contact Info */}
             <div className="space-y-4">
@@ -217,16 +205,10 @@ export default function Contact({ selectedClass = "" }: ContactProps) {
                 })}
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Right Column: High Fidelity Booking & Contact Form */}
-          <motion.div 
-            initial={{ opacity: 0, x: 35 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: false, amount: 0.1 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-7"
-          >
+          <div className="lg:col-span-7">
             <div className="bg-[#3b3f3a] border border-[#9bb08a]/20 p-6 md:p-8 rounded-3xl shadow-xl relative text-[#fff6da]">
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#f6c86b]/5 rounded-full blur-2xl pointer-events-none" />
 
@@ -339,7 +321,7 @@ export default function Contact({ selectedClass = "" }: ContactProps) {
                 )}
               </AnimatePresence>
             </div>
-          </motion.div>
+          </div>
 
         </div>
 

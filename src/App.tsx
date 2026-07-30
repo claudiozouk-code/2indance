@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { motion, useScroll, useTransform, useSpring } from "motion/react";
+import { motion } from "motion/react";
 import { ArrowLeft } from "lucide-react";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
@@ -21,57 +21,11 @@ interface ScrollSectionProps {
   className?: string;
 }
 
-function ScrollSection({ children, zIndex, effect, className = "" }: ScrollSectionProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const anchorRef = useRef<HTMLDivElement>(null);
-
-  // Track scroll progress of this container.
-  // - Starts at 0 when the bottom of this container enters the bottom of the viewport (meaning the user has scrolled all the way to the bottom and read everything!).
-  // - Ends at 1 when the bottom of this container leaves the top of the viewport.
-  // This perfectly preserves the reading limit of each page so no bottom content is cut off!
-  // We track `anchorRef` which is a static layout div with NO transforms, completely preventing feedback loop flickers!
-  const { scrollYProgress } = useScroll({
-    target: anchorRef,
-    offset: ["end end", "end start"]
-  });
-
-  // Smooth out the raw scroll progress using a highly responsive spring.
-  // This dampens mousewheel ticks and trackpad momentum, creating a premium fluid motion without any trembling!
-  const smoothProgress = useSpring(scrollYProgress, {
-    damping: 40,
-    stiffness: 320,
-    mass: 0.08,
-    restDelta: 0.001
-  });
-
-  // Parallax transform for section overlap
-  const yParallax = useTransform(smoothProgress, [0, 1], ["0vh", "100vh"]);
-
+function ScrollSection({ children, className = "" }: ScrollSectionProps) {
   return (
-    <div 
-      ref={containerRef}
-      style={{ zIndex }}
-      className={`relative ${effect === "hero" ? "mt-0" : "mt-[-2.5rem] md:mt-[-4rem]"}`}
-    >
-      {/* Invisible anchor element that remains static in layout flow to prevent scrolling feedback loops */}
-      <div ref={anchorRef} className="absolute inset-0 pointer-events-none" />
-
-      <motion.div
-        style={{ 
-          y: yParallax, 
-          willChange: "transform"
-        }}
-        className={`w-full overflow-hidden transform-gpu ${
-          effect === "hero" 
-            ? "" 
-            : "rounded-t-[2rem] md:rounded-t-[3.5rem] shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.35)] border-t border-white/10"
-        } ${className}`}
-      >
-        <div className="w-full h-full">
-          {children}
-        </div>
-      </motion.div>
-    </div>
+    <section className={`relative w-full ${className}`}>
+      {children}
+    </section>
   );
 }
 

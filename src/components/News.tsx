@@ -72,13 +72,7 @@ export default function News() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: -40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.15 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center max-w-3xl mx-auto mb-16"
-        >
+        <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-flex items-center space-x-2 bg-white/5 border border-[#9bb08a]/20 px-3.5 py-1.5 rounded-full mb-4">
             <Sparkles className="w-3.5 h-3.5 text-[#f6c86b]" />
             <span className="font-montserrat text-[10px] font-bold tracking-widest text-[#ffe6a6] uppercase">
@@ -91,17 +85,13 @@ export default function News() {
           <p className="font-sans text-sm sm:text-base text-[#fff6da]/80 font-light">
             Stay up to date with community news, technical tips from Xina and Laura, upcoming class launches, and special announcements.
           </p>
-        </motion.div>
+        </div>
 
         {/* News Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
           {articles.map((news, idx) => (
-            <motion.article
+            <article
               key={news.id}
-              initial={{ opacity: 0, y: 35, scale: 0.96 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: false, amount: 0.1 }}
-              transition={{ duration: 0.8, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
               className="bg-[#2a2d29]/60 border border-[#9bb08a]/15 rounded-3xl overflow-hidden shadow-md flex flex-col justify-between hover:border-[#f6c86b]/30 hover:bg-[#2a2d29]/80 transition-all duration-300 group"
             >
               {/* Image Header */}
@@ -151,18 +141,12 @@ export default function News() {
                   </button>
                 </div>
               </div>
-            </motion.article>
+            </article>
           ))}
         </div>
 
         {/* Newsletter Subscription Panel */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95, y: 30 }}
-          whileInView={{ opacity: 1, scale: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.15 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="bg-[#2a2d29] border border-[#9bb08a]/25 rounded-3xl p-8 md:p-12 shadow-xl text-center max-w-4xl mx-auto relative overflow-hidden"
-        >
+        <div className="bg-[#2a2d29] border border-[#9bb08a]/25 rounded-3xl p-8 md:p-12 shadow-xl text-center max-w-4xl mx-auto relative overflow-hidden">
           <div className="absolute top-[-30px] left-[-30px] w-48 h-48 bg-[#9bb08a]/5 rounded-full blur-[40px] pointer-events-none" />
           
           <div className="max-w-2xl mx-auto space-y-6 relative z-10">
@@ -211,7 +195,7 @@ export default function News() {
               )}
             </AnimatePresence>
           </div>
-        </motion.div>
+        </div>
 
         {/* Detailed Article Modal */}
         {activeArticle && (

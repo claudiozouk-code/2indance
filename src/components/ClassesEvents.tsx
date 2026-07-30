@@ -75,13 +75,7 @@ export default function ClassesEvents({ onSelectClass }: ClassesEventsProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.15 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center max-w-3xl mx-auto mb-12"
-        >
+        <div className="text-center max-w-3xl mx-auto mb-12">
           <div className="inline-flex items-center space-x-2 bg-white/5 border border-[#9bb08a]/20 px-3.5 py-1.5 rounded-full mb-4">
             <Sparkles className="w-3.5 h-3.5 text-[#f6c86b]" />
             <span className="font-montserrat text-[10px] font-bold tracking-widest text-[#ffe6a6] uppercase">
@@ -94,16 +88,10 @@ export default function ClassesEvents({ onSelectClass }: ClassesEventsProps) {
           <p className="font-sans text-sm sm:text-base text-[#fff6da]/80 font-light">
             Whether you want to learn Zouk, Lambada, or Samba de Gafieira, explore our schedule and join our passionate Hong Kong community.
           </p>
-        </motion.div>
+        </div>
 
         {/* Tab Switcher */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: false, amount: 0.15 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="flex justify-center mb-12"
-        >
+        <div className="flex justify-center mb-12">
           <div className="bg-[#2a2d29] border border-[#9bb08a]/20 p-1.5 rounded-2xl flex space-x-2 shadow-lg">
             <button
               onClick={() => setActiveTab("weekly")}
@@ -136,15 +124,10 @@ export default function ClassesEvents({ onSelectClass }: ClassesEventsProps) {
               Dance Styles
             </button>
           </div>
-        </motion.div>
+        </div>
 
         {/* Tab Content Panels */}
-        <motion.div
-          initial={{ opacity: 0, y: 35 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.05 }}
-          transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-        >
+        <div>
           <AnimatePresence mode="wait">
             
             {/* WEEKLY SCHEDULE */}
@@ -377,7 +360,7 @@ export default function ClassesEvents({ onSelectClass }: ClassesEventsProps) {
             )}
 
           </AnimatePresence>
-        </motion.div>
+        </div>
 
       </div>
     </section>
