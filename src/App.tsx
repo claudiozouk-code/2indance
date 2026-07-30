@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { motion, useScroll, useTransform, useSpring, useInView } from "motion/react";
+import { motion, useScroll, useTransform, useSpring } from "motion/react";
 import { ArrowLeft } from "lucide-react";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
@@ -44,29 +44,8 @@ function ScrollSection({ children, zIndex, effect, className = "" }: ScrollSecti
     restDelta: 0.001
   });
 
-  // Keep the current section completely fixed (stationary) relative to the viewport
-  // by translating it down by exactly the scroll distance (100vh) as the scrollbar moves.
-  // Using vh-based transforms is hardware-accelerated and maintains perfect alignment across different device screens!
+  // Parallax transform for section overlap
   const yParallax = useTransform(smoothProgress, [0, 1], ["0vh", "100vh"]);
-
-  // Detect when the section's static layout is active/visible in the viewport
-  const isInView = useInView(anchorRef, { once: false, amount: 0.05 });
-
-  // Fast, ultra-smooth entrance variants for the inner content
-  const contentVariants = {
-    hidden: { 
-      opacity: 0.3, 
-      y: 10,
-    },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        duration: 0.25,
-        ease: [0.16, 1, 0.3, 1]
-      }
-    }
-  };
 
   return (
     <div 
@@ -88,14 +67,9 @@ function ScrollSection({ children, zIndex, effect, className = "" }: ScrollSecti
             : "rounded-t-[2rem] md:rounded-t-[3.5rem] shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.35)] border-t border-white/10"
         } ${className}`}
       >
-        <motion.div
-          variants={contentVariants}
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
-          className="w-full h-full"
-        >
+        <div className="w-full h-full">
           {children}
-        </motion.div>
+        </div>
       </motion.div>
     </div>
   );
