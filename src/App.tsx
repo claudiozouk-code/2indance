@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { motion, useScroll, useTransform, useSpring, useInView } from "motion/react";
+import { motion } from "motion/react";
 import { ArrowLeft } from "lucide-react";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
@@ -16,88 +16,28 @@ import { injectTrackingTags, trackUserEvent } from "./utils";
 interface ScrollSectionProps {
   key?: string;
   children: React.ReactNode;
-  zIndex: number;
-  effect: string;
+  zIndex?: number;
+  effect?: string;
   className?: string;
 }
 
-function ScrollSection({ children, zIndex, effect, className = "" }: ScrollSectionProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const anchorRef = useRef<HTMLDivElement>(null);
+function ScrollSection({ children, effect, className = "" }: ScrollSectionProps) {
+  // Hero renders instantly with zero delay or scroll overhead
+  if (effect === "hero") {
+    return <section className={`relative w-full ${className}`}>{children}</section>;
+  }
 
-  // Track scroll progress of this container.
-  // - Starts at 0 when the bottom of this container enters the bottom of the viewport (meaning the user has scrolled all the way to the bottom and read everything!).
-  // - Ends at 1 when the bottom of this container leaves the top of the viewport.
-  // This perfectly preserves the reading limit of each page so no bottom content is cut off!
-  // We track `anchorRef` which is a static layout div with NO transforms, completely preventing feedback loop flickers!
-  const { scrollYProgress } = useScroll({
-    target: anchorRef,
-    offset: ["end end", "end start"]
-  });
-
-  // Smooth out the raw scroll progress using a highly responsive spring.
-  // This dampens mousewheel ticks and trackpad momentum, creating a premium fluid motion without any trembling!
-  const smoothProgress = useSpring(scrollYProgress, {
-    damping: 40,
-    stiffness: 320,
-    mass: 0.08,
-    restDelta: 0.001
-  });
-
-  // Keep the current section completely fixed (stationary) relative to the viewport
-  // by translating it down by exactly the scroll distance (100vh) as the scrollbar moves.
-  // Using vh-based transforms is hardware-accelerated and maintains perfect alignment across different device screens!
-  const yParallax = useTransform(smoothProgress, [0, 1], ["0vh", "100vh"]);
-
-  // Detect when the section's static layout is active/visible in the viewport
-  const isInView = useInView(anchorRef, { once: false, amount: 0.05 });
-
-  // Fast, ultra-smooth entrance variants for the inner content
-  const contentVariants = {
-    hidden: { 
-      opacity: 0, 
-      y: 20,
-    },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        duration: 0.35,
-        ease: [0.22, 1, 0.36, 1]
-      }
-    }
-  };
-
+  // Ultra-fast, simple, hardware-accelerated fade entrance for sections
   return (
-    <div 
-      ref={containerRef}
-      style={{ zIndex }}
-      className={`relative ${effect === "hero" ? "mt-0" : "mt-[-3.5rem] md:mt-[-5.5rem]"}`}
+    <motion.section
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.05 }}
+      transition={{ duration: 0.22, ease: "easeOut" }}
+      className={`relative w-full ${className}`}
     >
-      {/* Invisible anchor element that remains static in layout flow to prevent scrolling feedback loops */}
-      <div ref={anchorRef} className="absolute inset-0 pointer-events-none" />
-
-      <motion.div
-        style={{ 
-          y: yParallax, 
-          willChange: "transform"
-        }}
-        className={`w-full overflow-hidden ${
-          effect === "hero" 
-            ? "" 
-            : "rounded-t-[2.5rem] md:rounded-t-[4.5rem] shadow-[0_-25px_50px_-12px_rgba(0,0,0,0.55)]"
-        } ${className}`}
-      >
-        <motion.div
-          variants={contentVariants}
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
-          className="w-full h-full"
-        >
-          {children}
-        </motion.div>
-      </motion.div>
-    </div>
+      {children}
+    </motion.section>
   );
 }
 
