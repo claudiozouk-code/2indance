@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { motion, useScroll, useTransform } from "motion/react";
+import { motion } from "motion/react";
 import { ArrowLeft } from "lucide-react";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
@@ -16,40 +16,72 @@ import { injectTrackingTags, trackUserEvent } from "./utils";
 interface ScrollSectionProps {
   key?: string;
   children: React.ReactNode;
-  zIndex: number;
-  effect: string;
+  zIndex?: number;
+  effect?: string;
   className?: string;
 }
 
-function ScrollSection({ children, zIndex, className = "" }: ScrollSectionProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "start start"]
-  });
+function ScrollSection({ children, zIndex = 1, effect, className = "" }: ScrollSectionProps) {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [stickyTop, setStickyTop] = useState<number>(0);
 
-  const y = useTransform(scrollYProgress, [0, 1], ["3vh", "0vh"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.88, 0.96, 1]);
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const updateStickyTop = () => {
+      const rect = el.getBoundingClientRect();
+      const sectionHeight = el.offsetHeight || rect.height;
+      const viewportHeight = window.innerHeight;
+
+      if (sectionHeight > viewportHeight) {
+        // Stick when the bottom of this section reaches the bottom of the viewport,
+        // allowing the user to read/scroll through the entire section before the next card covers it.
+        setStickyTop(viewportHeight - sectionHeight);
+      } else {
+        setStickyTop(0);
+      }
+    };
+
+    updateStickyTop();
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateStickyTop();
+    });
+
+    window.addEventListener("resize", updateStickyTop);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateStickyTop);
+    };
+  }, []);
 
   return (
     <div 
-      ref={containerRef}
-      style={{ zIndex }}
-      className={`sticky top-0 w-full shadow-[0_-25px_60px_rgba(0,0,0,0.55)] border-t border-white/10 bg-[#3b3f3a] ${className}`}
+      ref={sectionRef}
+      style={{ 
+        position: "sticky",
+        top: `${stickyTop}px`,
+        zIndex 
+      }}
+      className={`w-full min-h-screen bg-[#3b3f3a] transform-gpu transition-shadow duration-300 ${
+        effect === "hero" 
+          ? "" 
+          : "rounded-t-[2.5rem] md:rounded-t-[3.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.65)] border-t border-white/10"
+      } ${className}`}
     >
-      <motion.div style={{ y, opacity }} className="w-full h-full">
-        {children}
-      </motion.div>
+      {children}
     </div>
   );
 }
 
 const DEFAULT_SECTIONS = [
   { id: "hero", name: "Hero Section", visible: true, zIndex: 10, effect: "hero" },
-  { id: "hainan", name: "Hainan Zouk Marathon", visible: true, zIndex: 15, effect: "zoom-in" },
-  { id: "about", name: "About Us", visible: true, zIndex: 20, effect: "zoom-in" },
-  { id: "classes-events", name: "Weekly Classes & Events", visible: true, zIndex: 30, effect: "slide-left" },
-  { id: "media", name: "Media & Gallery", visible: true, zIndex: 35, effect: "zoom-out" },
+  { id: "classes-events", name: "Weekly Classes & Events", visible: true, zIndex: 15, effect: "slide-left" },
+  { id: "hainan", name: "Hainan Zouk Marathon", visible: true, zIndex: 20, effect: "zoom-in" },
+  { id: "media", name: "Media & Gallery", visible: true, zIndex: 25, effect: "zoom-out" },
+  { id: "about", name: "About Us", visible: true, zIndex: 30, effect: "zoom-in" },
   { id: "news", name: "News & Articles", visible: true, zIndex: 40, effect: "slide-right" },
   { id: "contact", name: "Contact & Booking", visible: true, zIndex: 48, effect: "3d-rise" }
 ];
@@ -300,7 +332,7 @@ export default function App() {
 
       {currentPage === "home" ? (
         /* Main Page Layout */
-        <main className="relative overflow-hidden">
+        <main className="relative">
           {sectionsLayout
             .filter((sec: any) => sec.visible !== false)
             .map((sec: any) => {

@@ -34,11 +34,11 @@ import MediaPicker from "./MediaPicker";
 
 const DEFAULT_SECTIONS = [
   { id: "hero", name: "Hero Section", visible: true, zIndex: 10, effect: "hero" },
-  { id: "about", name: "About Us", visible: true, zIndex: 20, effect: "zoom-in" },
-  { id: "classes-events", name: "Weekly Classes & Events", visible: true, zIndex: 30, effect: "slide-left" },
-  { id: "media", name: "Media & Gallery", visible: true, zIndex: 35, effect: "zoom-out" },
+  { id: "classes-events", name: "Weekly Classes & Events", visible: true, zIndex: 15, effect: "slide-left" },
+  { id: "hainan", name: "Hainan Zouk Marathon", visible: true, zIndex: 20, effect: "zoom-in" },
+  { id: "media", name: "Media & Gallery", visible: true, zIndex: 25, effect: "zoom-out" },
+  { id: "about", name: "About Us", visible: true, zIndex: 30, effect: "zoom-in" },
   { id: "news", name: "News & Articles", visible: true, zIndex: 40, effect: "slide-right" },
-  { id: "hainan", name: "Hainan Zouk Marathon", visible: true, zIndex: 43, effect: "zoom-in" },
   { id: "contact", name: "Contact & Booking", visible: true, zIndex: 48, effect: "3d-rise" }
 ];
 
