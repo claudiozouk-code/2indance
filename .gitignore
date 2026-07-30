@@ -10,3 +10,6 @@ coverage/
 # Ignore local uploaded media files to protect production uploads on deployment
 uploads/*
 !uploads/.gitkeep
+
+# Ignore lock files from bun
+bun.lock*

@@ -94,16 +94,34 @@ export const aboutContent = {
   storyText2: "The philosophy of 2inDance (2 in Dance) centers entirely around the conversation that happens between two people on the dance floor. It's not just about learning steps; it's about developing an active body dialogue, healthy mechanics, and mutual trust. Whether you're taking your very first step or refining advanced head movements, 2inDance offers an inspiring space where music meets community.",
   founders: [
     {
+      id: "f-1",
       name: "Xina",
       role: "Co-Founder & Lead Instructor",
-      bio: "Xina is a world-class instructor known for her precise technique, expressive styling, and energetic dance philosophy. Dedicated to teaching Brazilian Zouk and Lambada, she breaks down complex biomechanics into intuitive, flowing movements. Her warmth and dedication ensure that every student feels confident and supported on the dance floor.",
-      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=600"
+      bio: "Xina is a world-class instructor and founder renowned for her surgical technical precision, body isolations, and expressive dance energy. Dedicated to Brazilian Zouk and Lambada, she breaks down complex biomechanics into intuitive, flowing movements. Her warm, encouraging pedagogy ensures every student builds confidence, posture, and effortless spin dynamics on the dance floor.",
+      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800",
+      specialties: ["Brazilian Zouk", "Classic Lambada", "Biomechanics & Technique", "Body Isolations"],
+      quote: "Dance is a physical dialogue of mutual trust, energy, and freedom.",
+      socials: {
+        instagram: "https://instagram.com/2indance",
+        facebook: "https://facebook.com/2indance",
+        youtube: "https://youtube.com/@2indance",
+        whatsapp: "https://wa.me/85291234567"
+      }
     },
     {
+      id: "f-2",
       name: "Laura",
       role: "Co-Founder & Lead Instructor",
-      bio: "Laura is a passionate choreographer and pioneer who brings grace, deep musicality, and connection to every class. With an extensive background in Samba de Gafieira and Zouk, Laura excels in teaching lead-and-follow relationships, allowing dancers to speak a wordless language. Her creative choreography has inspired countless dancers globally.",
-      image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&q=80&w=600"
+      bio: "Laura is a passionate choreographer, artist, and pioneer who brings grace, deep musicality, and lyrical connection to 2inDance. With extensive mastery in Samba de Gafieira, Zouk, and safe head movement (cambré) mechanics, Laura excels in cultivating active lead-and-follow relationships. Her creative choreographies have inspired dancers at festivals across Asia and beyond.",
+      image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&q=80&w=800",
+      specialties: ["Samba de Gafieira", "Zouk Styling & Cambré", "Lead & Follow Connection", "Musicality"],
+      quote: "True partnership begins when you listen with your whole body.",
+      socials: {
+        instagram: "https://instagram.com/2indance",
+        facebook: "https://facebook.com/2indance",
+        youtube: "https://youtube.com/@2indance",
+        whatsapp: "https://wa.me/85291234567"
+      }
     }
   ],
   stats: [

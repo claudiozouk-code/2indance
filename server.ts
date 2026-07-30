@@ -2,12 +2,13 @@ import express from "express";
 import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
-import mysql from "mysql2/promise";
+import mysql from "mysql2";
 import dotenv from "dotenv";
 
 // Import the default fallback data directly
 import { 
   aboutContent, 
+  danceStyles,
   weeklySchedule, 
   upcomingEvents, 
   mediaItems, 
@@ -26,23 +27,12 @@ app.set("trust proxy", 1);
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
-// Security & HTTPS Enforcement Middleware
+// Security & CORS Middleware
 app.use((req, res, next) => {
-  // Automatically redirect HTTP to HTTPS when behind reverse proxy
-  if (req.headers["x-forwarded-proto"] === "http") {
-    return res.redirect(301, `https://${req.headers.host}${req.url}`);
-  }
-
-  // Security Headers for Browser Trust & SSL Enforcement
+  // Security & CORS Headers for Browser Trust
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
-  
-  // Upgrade-Insecure-Requests automatically converts any http:// image/script to https://
-  res.setHeader("Content-Security-Policy", "upgrade-insecure-requests;");
-  
-  // Strict Transport Security (HSTS)
-  res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
   
   // Prevent MIME sniffing
   res.setHeader("X-Content-Type-Options", "nosniff");
@@ -53,65 +43,88 @@ app.use((req, res, next) => {
   next();
 });
 
-// Database connection configuration targeting Hostinger Remote MySQL
+// Database Connection Configuration
+const envHost = process.env.DB_HOST;
+const hostsToTry = Array.from(new Set([
+  "srv2106.hstgr.io",
+  envHost,
+  "localhost"
+].filter(Boolean))) as string[];
+
+let activeConnectedHost = hostsToTry[0] || "srv2106.hstgr.io";
+
 const dbConfig = {
-  host: (process.env.DB_HOST && process.env.DB_HOST !== "127.0.0.1" && process.env.DB_HOST !== "localhost")
-    ? process.env.DB_HOST
-    : "srv2106.hstgr.io",
+  get host() { return activeConnectedHost; },
   port: parseInt(process.env.DB_PORT || "3306"),
-  user: (process.env.DB_USER && process.env.DB_USER !== "root" && process.env.DB_USER !== "user")
-    ? process.env.DB_USER
-    : "u906077841_claudiozouk",
-  password: (process.env.DB_PASSWORD && process.env.DB_PASSWORD.trim() !== "")
-    ? process.env.DB_PASSWORD
-    : "@Just990717@",
-  database: (process.env.DB_NAME && process.env.DB_NAME !== "test" && process.env.DB_NAME !== "database" && process.env.DB_NAME !== "db")
-    ? process.env.DB_NAME
-    : "u906077841_2indancenew",
+  user: process.env.DB_USER || "u906077841_claudiozouk",
+  password: process.env.DB_PASSWORD || "@Just990717@",
+  database: process.env.DB_NAME || "u906077841_2indancenew",
 };
 
-console.log("Resolved DB Config:", {
-  host: dbConfig.host,
-  port: dbConfig.port,
-  user: dbConfig.user,
-  database: dbConfig.database,
-  passwordLength: dbConfig.password ? dbConfig.password.length : 0,
-});
-
-let pool: mysql.Pool | null = null;
+let rawPool: mysql.Pool | null = null;
+let dbPoolPromise: any = null;
+let poolAttempted = false;
 let dbHealthy = false;
+let dbLastError: string | null = null;
 
 async function getDbPool() {
-  if (!pool) {
+  if (dbPoolPromise) return dbPoolPromise;
+  if (poolAttempted) return null;
+  poolAttempted = true;
+
+  let lastErr: any = null;
+
+  for (const host of hostsToTry) {
+    let testPool: mysql.Pool | null = null;
     try {
-      pool = mysql.createPool({
+      console.log(`[Database] Attempting connection to host [${host}:${dbConfig.port}]...`);
+      testPool = mysql.createPool({
         ...dbConfig,
+        host,
         waitForConnections: true,
         connectionLimit: 5,
         queueLimit: 0,
-        connectTimeout: 8000, // Fail fast if unreachable
+        connectTimeout: 3000,
+        enableKeepAlive: true,
+        keepAliveInitialDelay: 10000,
       });
-      
-      const conn = await pool.getConnection();
-      console.log("Successfully connected to Hostinger MySQL Database!");
+
+      testPool.on("error", (err: any) => {
+        console.warn(`[Database Pool Error on ${host}]: ${err?.message || err}`);
+        dbHealthy = false;
+        dbLastError = err?.message || "Connection error";
+      });
+
+      const promisePool = testPool.promise();
+      await promisePool.query("SELECT 1");
+      console.log(`[Database] Connected successfully to MySQL via [${host}]!`);
+
+      activeConnectedHost = host;
+      rawPool = testPool;
+      dbPoolPromise = promisePool;
       dbHealthy = true;
-      
-      // Initialize tables and seed default data
-      await initializeDatabase(conn);
-      
-      conn.release();
+      dbLastError = null;
+
+      await initializeDatabase(promisePool);
+      return dbPoolPromise;
     } catch (err: any) {
-      console.error("Failed to connect to Hostinger MySQL Database:", err.message);
-      console.warn("Server will fall back to in-memory/static content mode!");
-      pool = null;
-      dbHealthy = false;
+      lastErr = err;
+      if (testPool) {
+        try { testPool.end(); } catch (_) {}
+      }
+      console.warn(`[Database] Host [${host}] unreachable: ${err.message}`);
     }
   }
-  return pool;
+
+  dbHealthy = false;
+  dbLastError = lastErr ? lastErr.message : "Database hosts unreachable";
+  console.warn(`[Database] MySQL connection offline. Operating with local data fallback.`);
+  return null;
 }
 
 // Memory fallbacks in case database connection fails or is offline
 let localAbout = { ...aboutContent };
+let localDanceStyles = [...danceStyles];
 let localSchedule = [...weeklySchedule];
 let localEvents = [...upcomingEvents];
 let localMedia = [...mediaItems];
@@ -159,7 +172,7 @@ let localFrontpage = {
   sections_order: "[]"
 };
 
-async function initializeDatabase(conn: mysql.PoolConnection) {
+async function initializeDatabase(conn: any) {
   try {
     // 1. Create Submissions table
     await conn.query(`
@@ -192,6 +205,17 @@ async function initializeDatabase(conn: mysql.PoolConnection) {
         role VARCHAR(255) NOT NULL,
         bio TEXT NOT NULL,
         image VARCHAR(500) NOT NULL
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    // 3.5. Create Dance Styles table
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS site_dance_styles (
+        id VARCHAR(50) PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        desc_text TEXT NOT NULL,
+        image VARCHAR(500) NOT NULL,
+        features TEXT NOT NULL
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
 
@@ -399,6 +423,17 @@ async function initializeDatabase(conn: mysql.PoolConnection) {
       }
     }
 
+    // Seed Dance Styles
+    const [styleRows] = await conn.query("SELECT * FROM site_dance_styles LIMIT 1");
+    if ((styleRows as any[]).length === 0) {
+      for (const item of danceStyles) {
+        await conn.query(`
+          INSERT INTO site_dance_styles (id, title, desc_text, image, features)
+          VALUES (?, ?, ?, ?, ?)
+        `, [item.id, item.title, item.desc, item.image, JSON.stringify(item.features || [])]);
+      }
+    }
+
     // Seed Schedule
     const [schedRows] = await conn.query("SELECT * FROM site_weekly_schedule LIMIT 1");
     if ((schedRows as any[]).length === 0) {
@@ -432,6 +467,17 @@ async function initializeDatabase(conn: mysql.PoolConnection) {
       }
     }
 
+    // Seed Event Galleries
+    const [galRows] = await conn.query("SELECT * FROM site_event_galleries LIMIT 1");
+    if ((galRows as any[]).length === 0) {
+      for (const item of eventGalleries) {
+        await conn.query(`
+          INSERT INTO site_event_galleries (title, date, location, category, coverImage, description, photos)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `, [item.title, item.date, item.location, item.category, item.coverImage, item.description, JSON.stringify(item.photos || [])]);
+      }
+    }
+
     // Seed News
     const [newsRows] = await conn.query("SELECT * FROM site_news_items LIMIT 1");
     if ((newsRows as any[]).length === 0) {
@@ -457,27 +503,82 @@ getDbPool();
 // REST API ENDPOINTS
 // ==========================================
 
-// 1. DATABASE STATUS & INFO
+// 1. DATABASE STATUS & INFO DIAGNOSTICS
 app.get("/api/db-status", async (req, res) => {
   try {
     const dbPool = await getDbPool();
     if (!dbPool) {
       res.status(200).json({ 
         connected: false, 
-        message: "Using offline in-memory/static content mode. (Database unreachable/unauthorized)" 
+        host: dbConfig.host,
+        user: dbConfig.user,
+        database: dbConfig.database,
+        port: dbConfig.port,
+        lastError: dbLastError || "Unreachable or unauthorized remote host.",
+        message: "Modo offline ativo (dados estáticos em memória). O site funciona perfeitamente sem interrupções." 
       });
       return;
     }
+
+    const startTime = Date.now();
+    const [tables] = await dbPool.query("SHOW TABLES") as any[];
+    const pingMs = Date.now() - startTime;
+
     res.status(200).json({ 
       connected: true, 
-      message: "Successfully connected to Hostinger MySQL database!",
+      message: "Conectado com sucesso ao Banco MySQL da Hostinger!",
       host: dbConfig.host,
-      database: dbConfig.database
+      user: dbConfig.user,
+      database: dbConfig.database,
+      port: dbConfig.port,
+      pingMs,
+      tableCount: tables.length,
+      tables: tables.map((t: any) => Object.values(t)[0])
     });
   } catch (err: any) {
     res.status(200).json({ 
       connected: false, 
-      message: "Offline mode. Connection failed: " + err.message 
+      host: dbConfig.host,
+      user: dbConfig.user,
+      database: dbConfig.database,
+      port: dbConfig.port,
+      lastError: err.message,
+      message: "Falha na conexão: " + err.message 
+    });
+  }
+});
+
+// Force test or retry database connection
+app.post("/api/db-test", async (req, res) => {
+  if (rawPool) {
+    try { rawPool.end(); } catch (_) {}
+    rawPool = null;
+  }
+  dbPoolPromise = null;
+  poolAttempted = false;
+  const dbPool = await getDbPool();
+  if (dbPool) {
+    res.json({
+      success: true,
+      connected: true,
+      message: "Conexão estabelecida com sucesso ao MySQL da Hostinger!",
+      host: dbConfig.host,
+      database: dbConfig.database
+    });
+  } else {
+    res.json({
+      success: false,
+      connected: false,
+      error: dbLastError || "Não foi possível conectar ao banco remoto.",
+      host: dbConfig.host,
+      database: dbConfig.database,
+      user: dbConfig.user,
+      instructions: [
+        "1. Acesse o painel da Hostinger -> 'MySQL Remoto' (Remote MySQL).",
+        "2. Adicione o IP '0.0.0.0/0' ou '%', liberando acesso remoto.",
+        "3. Verifique se o nome do banco 'u906077841_2indancenew' e usuário 'u906077841_claudiozouk' coincidem.",
+        "4. O site conta com fallback automático (Modo Offline) para garantir 100% de disponibilidade visual e funcional!"
+      ]
     });
   }
 });
@@ -722,7 +823,7 @@ app.put("/api/founders/:id", async (req, res) => {
       `, [name, role, bio, image, id]);
       res.json({ success: true });
     } else {
-      localAbout.founders = localAbout.founders.map(f => f.name === name ? { name, role, bio, image } : f);
+      localAbout.founders = localAbout.founders.map(f => f.name === name ? { ...f, name, role, bio, image } : f);
       res.json({ success: true });
     }
   } catch (err: any) {
@@ -747,6 +848,28 @@ app.delete("/api/founders/:id", async (req, res) => {
 
 
 // 4. WEEKLY SCHEDULE API
+// DANCE STYLES API
+app.get("/api/dance-styles", async (req, res) => {
+  try {
+    const dbPool = await getDbPool();
+    if (!dbPool) {
+      res.json(localDanceStyles);
+      return;
+    }
+    const [rows] = await dbPool.query("SELECT * FROM site_dance_styles ORDER BY id ASC");
+    const parsedRows = (rows as any[]).map(r => ({
+      id: r.id,
+      title: r.title,
+      desc: r.desc_text,
+      image: r.image,
+      features: typeof r.features === 'string' ? JSON.parse(r.features) : (r.features || [])
+    }));
+    res.json(parsedRows.length > 0 ? parsedRows : localDanceStyles);
+  } catch (err) {
+    res.json(localDanceStyles);
+  }
+});
+
 app.get("/api/schedule", async (req, res) => {
   try {
     const dbPool = await getDbPool();
@@ -1148,11 +1271,6 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Media & Uploads Safety (Modo Restrito)
-// By default, enabled (true) unless explicitly configured as "false"
-const restrictedMediaMode = process.env.RESTRICTED_MEDIA_MODE !== "false";
-console.log(`[Media Protection] Modo Restrito (Restricted Media Mode): ${restrictedMediaMode ? "ENABLED (ACTIVE)" : "DISABLED"}`);
-
 // Serve /uploads statically so that the uploaded photos are visible everywhere
 app.use("/uploads", express.static(uploadsDir));
 
@@ -1200,13 +1318,6 @@ app.post("/api/upload", async (req, res) => {
     let finalFilename = `${Date.now()}_${cleanFilename.endsWith(`.${extension}`) ? cleanFilename : `${cleanFilename}.${extension}`}`;
     let filePath = path.join(uploadsDir, finalFilename);
 
-    // If restricted mode is enabled, guarantee that we NEVER overwrite an existing file
-    if (restrictedMediaMode && fs.existsSync(filePath)) {
-      const randomSuffix = Math.floor(Math.random() * 10000);
-      finalFilename = `${Date.now()}_${randomSuffix}_${cleanFilename.endsWith(`.${extension}`) ? cleanFilename : `${cleanFilename}.${extension}`}`;
-      filePath = path.join(uploadsDir, finalFilename);
-    }
-
     await fs.promises.writeFile(filePath, dataBuffer);
 
     const url = `/uploads/${finalFilename}`;
@@ -1242,18 +1353,6 @@ app.get("/api/uploaded-media", async (req, res) => {
     console.error("[Media Server] Error reading uploads folder:", err);
     res.json([]);
   }
-});
-
-// Endpoint to check media server status and restricted mode
-app.get("/api/media-status", (req, res) => {
-  res.json({
-    success: true,
-    restricted_mode: restrictedMediaMode,
-    uploads_dir_exists: fs.existsSync(uploadsDir),
-    message: restrictedMediaMode 
-      ? "Modo Restrito está ATIVO. Os arquivos de mídia estão protegidos contra deleção ou sobrescrita acidental." 
-      : "Modo Restrito está desativado."
-  });
 });
 
 

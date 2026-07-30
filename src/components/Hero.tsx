@@ -48,8 +48,8 @@ export default function Hero() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.12,
-        delayChildren: 0.15,
+        staggerChildren: 0.08,
+        delayChildren: 0.1,
       },
     },
   };
@@ -57,19 +57,16 @@ export default function Hero() {
   const wordVariants = {
     hidden: { 
       opacity: 0, 
-      y: 45, 
-      rotateX: -60,
-      scale: 0.85
+      y: 25, 
+      scale: 0.95
     },
     visible: { 
       opacity: 1, 
       y: 0, 
-      rotateX: 0,
       scale: 1,
       transition: { 
-        type: "spring",
-        damping: 14,
-        stiffness: 95,
+        duration: 0.4,
+        ease: [0.22, 1, 0.36, 1]
       }
     },
   };

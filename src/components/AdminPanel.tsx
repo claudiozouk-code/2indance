@@ -102,7 +102,6 @@ export default function AdminPanel() {
   // DB connection status
   const [dbStatus, setDbStatus] = useState({ connected: false, message: "" });
   const [isCheckingDb, setIsCheckingDb] = useState(false);
-  const [mediaRestricted, setMediaRestricted] = useState(true);
 
   // Active Admin Tab
   const [activeTab, setActiveTab] = useState<"frontpage" | "about" | "schedule" | "events" | "media" | "news" | "submissions" | "global_settings">("frontpage");
@@ -242,14 +241,26 @@ export default function AdminPanel() {
       setDbStatus({ connected: data.connected, message: data.message });
     } catch (err) {
       setDbStatus({ connected: false, message: "Could not poll database status." });
+    } finally {
+      setIsCheckingDb(false);
     }
+  };
 
+  const handleTestDbConnection = async () => {
+    setIsCheckingDb(true);
     try {
-      const resMedia = await fetch("/api/media-status");
-      const dataMedia = await resMedia.json();
-      setMediaRestricted(dataMedia.restricted_mode);
-    } catch (err) {
-      console.error("Error fetching media status:", err);
+      const res = await fetch("/api/db-test", { method: "POST" });
+      const data = await res.json();
+      if (data.connected) {
+        setDbStatus({ connected: true, message: data.message });
+        triggerAlert("success", "MySQL Conectado! " + data.message);
+        fetchAllData();
+      } else {
+        setDbStatus({ connected: false, message: "Modo Offline: " + (data.error || "Banco de dados indisponível") });
+        triggerAlert("error", "Erro MySQL: " + (data.error || "Acesso remoto negado. Verifique o Remote MySQL no painel Hostinger."));
+      }
+    } catch (err: any) {
+      triggerAlert("error", "Erro ao testar conexão: " + err.message);
     } finally {
       setIsCheckingDb(false);
     }
@@ -904,29 +915,23 @@ export default function AdminPanel() {
                 {dbStatus.message || "Checking Connection..."}
               </p>
             </div>
-            <button 
-              onClick={fetchDbStatus} 
-              disabled={isCheckingDb}
-              className="p-1.5 hover:bg-white/5 rounded-lg text-[#f6c86b] transition-all cursor-pointer"
-              title="Refresh Status"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${isCheckingDb ? "animate-spin" : ""}`} />
-            </button>
-          </div>
-
-          {/* Media Protection Section (Modo Restrito) */}
-          <div className="flex items-center space-x-3.5 border-t sm:border-t-0 sm:border-l border-white/10 pt-3 sm:pt-0 sm:pl-6">
-            <div className={`p-2.5 rounded-xl ${mediaRestricted ? "bg-emerald-500/10 border border-[#9bb08a]/30 text-[#9bb08a]" : "bg-orange-500/10 border border-orange-500/30 text-orange-400"}`}>
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="text-xs font-montserrat font-bold tracking-wider uppercase text-white/90">Proteção de Mídia</span>
-                <span className={`inline-block w-2 h-2 rounded-full ${mediaRestricted ? "bg-emerald-500 animate-pulse" : "bg-orange-500"}`} />
-              </div>
-              <p className="text-[11px] text-[#fff6da]/65 leading-tight font-mono mt-0.5">
-                {mediaRestricted ? "Modo Restrito Ativo 🔒 (Anti-Deletar)" : "Modo Restrito Desativado"}
-              </p>
+            <div className="flex items-center space-x-1.5">
+              <button 
+                onClick={fetchDbStatus} 
+                disabled={isCheckingDb}
+                className="p-1.5 hover:bg-white/5 rounded-lg text-[#f6c86b] transition-all cursor-pointer"
+                title="Atualizar Status"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isCheckingDb ? "animate-spin" : ""}`} />
+              </button>
+              <button 
+                onClick={handleTestDbConnection} 
+                disabled={isCheckingDb}
+                className="px-2.5 py-1 bg-[#f6c86b]/10 hover:bg-[#f6c86b]/20 border border-[#f6c86b]/30 rounded-lg text-[10px] font-mono font-bold text-[#f6c86b] transition-all cursor-pointer"
+                title="Testar Conexão Direta ao Banco MySQL Hostinger"
+              >
+                Testar DB
+              </button>
             </div>
           </div>
         </div>

@@ -38,10 +38,10 @@ function ScrollSection({ children, zIndex, effect, className = "" }: ScrollSecti
   // Smooth out the raw scroll progress using a highly responsive spring.
   // This dampens mousewheel ticks and trackpad momentum, creating a premium fluid motion without any trembling!
   const smoothProgress = useSpring(scrollYProgress, {
-    damping: 35,
-    stiffness: 220,
-    mass: 0.15,
-    restDelta: 0.0001
+    damping: 40,
+    stiffness: 320,
+    mass: 0.08,
+    restDelta: 0.001
   });
 
   // Keep the current section completely fixed (stationary) relative to the viewport
@@ -50,23 +50,20 @@ function ScrollSection({ children, zIndex, effect, className = "" }: ScrollSecti
   const yParallax = useTransform(smoothProgress, [0, 1], ["0vh", "100vh"]);
 
   // Detect when the section's static layout is active/visible in the viewport
-  const isInView = useInView(anchorRef, { once: false, amount: 0.15 });
+  const isInView = useInView(anchorRef, { once: false, amount: 0.05 });
 
-  // Elegant entrance variants for the inner content
+  // Fast, ultra-smooth entrance variants for the inner content
   const contentVariants = {
     hidden: { 
       opacity: 0, 
-      y: 40,
+      y: 20,
     },
     visible: { 
       opacity: 1, 
       y: 0,
       transition: {
-        type: "spring",
-        stiffness: 90,
-        damping: 18,
-        mass: 0.9,
-        duration: 0.8
+        duration: 0.35,
+        ease: [0.22, 1, 0.36, 1]
       }
     }
   };
@@ -83,6 +80,7 @@ function ScrollSection({ children, zIndex, effect, className = "" }: ScrollSecti
       <motion.div
         style={{ 
           y: yParallax, 
+          willChange: "transform"
         }}
         className={`w-full overflow-hidden ${
           effect === "hero" 
@@ -295,10 +293,10 @@ export default function App() {
 
     return (
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -15 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
         className="pt-24 min-h-screen bg-[#3b3f3a] text-[#fff6da]"
       >
         {/* Subpage Hero Header */}
