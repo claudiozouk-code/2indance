@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { motion } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import { ArrowLeft } from "lucide-react";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
@@ -21,49 +21,26 @@ interface ScrollSectionProps {
   className?: string;
 }
 
-function ScrollSection({ children, effect, className = "" }: ScrollSectionProps) {
-  const getVariants = () => {
-    switch (effect) {
-      case "hero":
-        return {
-          hidden: { opacity: 0 },
-          visible: { opacity: 1, transition: { duration: 0.4 } }
-        };
-      case "slide-left":
-        return {
-          hidden: { opacity: 0, x: -24 },
-          visible: { opacity: 1, x: 0, transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] } }
-        };
-      case "slide-right":
-        return {
-          hidden: { opacity: 0, x: 24 },
-          visible: { opacity: 1, x: 0, transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] } }
-        };
-      case "zoom-out":
-        return {
-          hidden: { opacity: 0, scale: 0.97, y: 15 },
-          visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] } }
-        };
-      case "zoom-in":
-      case "3d-rise":
-      default:
-        return {
-          hidden: { opacity: 0, y: 24 },
-          visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] } }
-        };
-    }
-  };
+function ScrollSection({ children, zIndex, className = "" }: ScrollSectionProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "start start"]
+  });
+
+  const y = useTransform(scrollYProgress, [0, 1], ["3vh", "0vh"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.88, 0.96, 1]);
 
   return (
-    <motion.section 
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.08 }}
-      variants={getVariants()}
-      className={`relative w-full ${className}`}
+    <div 
+      ref={containerRef}
+      style={{ zIndex }}
+      className={`sticky top-0 w-full shadow-[0_-25px_60px_rgba(0,0,0,0.55)] border-t border-white/10 bg-[#3b3f3a] ${className}`}
     >
-      {children}
-    </motion.section>
+      <motion.div style={{ y, opacity }} className="w-full h-full">
+        {children}
+      </motion.div>
+    </div>
   );
 }
 
