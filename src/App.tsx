@@ -21,11 +21,49 @@ interface ScrollSectionProps {
   className?: string;
 }
 
-function ScrollSection({ children, className = "" }: ScrollSectionProps) {
+function ScrollSection({ children, effect, className = "" }: ScrollSectionProps) {
+  const getVariants = () => {
+    switch (effect) {
+      case "hero":
+        return {
+          hidden: { opacity: 0 },
+          visible: { opacity: 1, transition: { duration: 0.4 } }
+        };
+      case "slide-left":
+        return {
+          hidden: { opacity: 0, x: -24 },
+          visible: { opacity: 1, x: 0, transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] } }
+        };
+      case "slide-right":
+        return {
+          hidden: { opacity: 0, x: 24 },
+          visible: { opacity: 1, x: 0, transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] } }
+        };
+      case "zoom-out":
+        return {
+          hidden: { opacity: 0, scale: 0.97, y: 15 },
+          visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] } }
+        };
+      case "zoom-in":
+      case "3d-rise":
+      default:
+        return {
+          hidden: { opacity: 0, y: 24 },
+          visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] } }
+        };
+    }
+  };
+
   return (
-    <section className={`relative w-full ${className}`}>
+    <motion.section 
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.08 }}
+      variants={getVariants()}
+      className={`relative w-full ${className}`}
+    >
       {children}
-    </section>
+    </motion.section>
   );
 }
 
