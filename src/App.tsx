@@ -92,7 +92,14 @@ export default function App() {
   // SEO & Global tags optimization client-side synchronizer
   useEffect(() => {
     fetch("/api/frontpage")
-      .then((res) => res.json())
+      .then((res) => {
+        const ct = res.headers.get("content-type") || "";
+        if (res.ok && ct.includes("application/json")) {
+          return res.json();
+        }
+        const cached = localStorage.getItem("admin_frontpage_settings");
+        return cached ? JSON.parse(cached) : null;
+      })
       .then((data) => {
         if (data && data.success) {
           // 1. Dynamic document title

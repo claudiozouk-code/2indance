@@ -586,18 +586,36 @@ app.post("/api/db-test", async (req, res) => {
 // 2. ADMIN LOGIN
 app.post("/api/admin/login", async (req, res) => {
   const { username, password } = req.body;
+  const inputUser = (username || "").trim();
+  const inputPass = (password || "").trim();
+  const lowerUser = inputUser.toLowerCase();
+
+  // Instant authentication for master admin credentials (bypasses slow connection timeouts)
+  const isMasterAdmin = 
+    ((lowerUser === "claudiozouk" || lowerUser === "claudiozouk@gmail.com") && (inputPass === "@Soassim2535" || inputPass === "@Just990717@")) ||
+    (lowerUser === "admin" && (inputPass === "@Just990717@" || inputPass === "@Soassim2535"));
+
+  if (isMasterAdmin) {
+    res.status(200).json({ 
+      success: true, 
+      token: "admin-secure-session-2indance-990717",
+      user: { username: lowerUser === "admin" ? "admin" : "claudiozouk", email: "claudiozouk@gmail.com" } 
+    });
+    return;
+  }
   
+  // Database check for custom created admin accounts
   try {
     const dbPool = await getDbPool();
     if (dbPool) {
       const [rows] = await dbPool.query(
         "SELECT * FROM admin_users WHERE username = ? OR email = ?", 
-        [username, username]
+        [inputUser, inputUser]
       ) as any[];
 
       if (rows.length > 0) {
         const user = rows[0];
-        if (password === user.password) {
+        if (inputPass === user.password) {
           res.status(200).json({ 
             success: true, 
             token: "admin-secure-session-2indance-990717",
@@ -611,23 +629,7 @@ app.post("/api/admin/login", async (req, res) => {
     console.error("Database authentication query error:", dbErr.message);
   }
 
-  // Static/Fallback authentication (original values and specified credentials)
-  const adminUser = "admin";
-  const adminEmail = "claudiozouk@gmail.com";
-  const adminPass = process.env.DB_PASSWORD || "@Just990717@";
-
-  if (
-    ((username === adminUser || username === adminEmail) && password === adminPass) ||
-    ((username === "claudiozouk" || username === "claudiozouk@gmail.com") && password === "@Soassim2535")
-  ) {
-    res.status(200).json({ 
-      success: true, 
-      token: "admin-secure-session-2indance-990717",
-      user: { username: username === adminUser ? adminUser : "claudiozouk", email: adminEmail } 
-    });
-  } else {
-    res.status(401).json({ success: false, error: "Invalid username or password." });
-  }
+  res.status(401).json({ success: false, error: "Usuário ou senha incorretos." });
 });
 
 
