@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { motion } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import { ArrowLeft } from "lucide-react";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
@@ -11,34 +11,176 @@ import HainanMarathon from "./components/HainanMarathon";
 import Contact from "./components/Contact";
 import AdminPanel from "./components/AdminPanel";
 import Footer from "./components/Footer";
+import SectionTransitionDivider from "./components/SectionTransitionDivider";
+import ScrollRadar from "./components/ScrollRadar";
+import DanceParticleTrail from "./components/DanceParticleTrail";
 import { injectTrackingTags, trackUserEvent } from "./utils";
 
 interface ScrollSectionProps {
-  key?: string;
+  key?: React.Key;
+  id?: string;
   children: React.ReactNode;
   zIndex?: number;
   effect?: string;
   className?: string;
+  showDivider?: boolean;
+  dividerLabel?: string;
+  dividerTheme?: "gold" | "sage" | "amber";
 }
 
-function ScrollSection({ children, className = "" }: ScrollSectionProps) {
+function ScrollSection({
+  id,
+  children,
+  effect = "fade",
+  className = "",
+  showDivider = false,
+  dividerLabel,
+  dividerTheme = "gold"
+}: ScrollSectionProps) {
+  const isHero = id === "home" || id === "hero";
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [isInView, setIsInView] = useState(isHero);
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    }
+  }, []);
+
+  // Parallax Scroll Tracking linked to this specific section's scroll progress
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"]
+  });
+
+  // Layer 1: Slow luminous ambient light float (-45px to +45px)
+  const slowY = useTransform(scrollYProgress, [0, 1], reducedMotion ? [0, 0] : [-45, 45]);
+  // Layer 2: Medium kinetic dance curvature rings drift (-95px to +95px)
+  const mediumY = useTransform(scrollYProgress, [0, 1], reducedMotion ? [0, 0] : [-95, 95]);
+  // Layer 3: Subtle rotational drift for celestial dance arcs (-15deg to +15deg)
+  const rotateDeg = useTransform(scrollYProgress, [0, 1], reducedMotion ? [0, 0] : [-15, 15]);
+  // Layer 4: Counter-rotational float (+12deg to -12deg)
+  const counterRotateDeg = useTransform(scrollYProgress, [0, 1], reducedMotion ? [0, 0] : [12, -12]);
+
+  // Color palettes tailored to section theme
+  const themeColors = {
+    gold: {
+      glowA: "rgba(246, 200, 107, 0.12)",
+      glowB: "rgba(255, 230, 166, 0.08)",
+      ring: "rgba(246, 200, 107, 0.14)"
+    },
+    sage: {
+      glowA: "rgba(155, 176, 138, 0.15)",
+      glowB: "rgba(255, 246, 218, 0.07)",
+      ring: "rgba(155, 176, 138, 0.16)"
+    },
+    amber: {
+      glowA: "rgba(229, 160, 69, 0.15)",
+      glowB: "rgba(246, 200, 107, 0.09)",
+      ring: "rgba(229, 160, 69, 0.18)"
+    }
+  }[dividerTheme] || {
+    glowA: "rgba(246, 200, 107, 0.12)",
+    glowB: "rgba(255, 230, 166, 0.08)",
+    ring: "rgba(246, 200, 107, 0.14)"
+  };
+
   return (
-    <div className={`w-full bg-[#3b3f3a] ${className}`}>
-      <div className="w-full h-full">
+    <div ref={sectionRef} id={id} className="relative w-full section-ambient-mesh overflow-hidden">
+      {/* 1. Subtle Multi-Layer Parallax Background Elements */}
+      {!reducedMotion && (
+        <div 
+          aria-hidden="true" 
+          className="pointer-events-none absolute inset-0 overflow-hidden z-0 select-none"
+        >
+          {/* Parallax Layer A: Deep Slow Floating Ambient Light Orb (top-left) */}
+          <motion.div
+            style={{ 
+              y: slowY,
+              background: `radial-gradient(circle, ${themeColors.glowA} 0%, rgba(0,0,0,0) 70%)`
+            }}
+            className="absolute -top-20 -left-16 w-[420px] h-[420px] md:w-[640px] md:h-[640px] rounded-full blur-3xl will-change-transform"
+          />
+
+          {/* Parallax Layer B: Deep Slow Floating Ambient Light Orb (bottom-right) */}
+          <motion.div
+            style={{ 
+              y: slowY,
+              background: `radial-gradient(circle, ${themeColors.glowB} 0%, rgba(0,0,0,0) 70%)`
+            }}
+            className="absolute -bottom-24 -right-20 w-[380px] h-[380px] md:w-[580px] md:h-[580px] rounded-full blur-3xl will-change-transform"
+          />
+
+          {/* Parallax Layer C: Medium Speed Geometric Dance Ring (Curvature arc) */}
+          <motion.div
+            style={{ 
+              y: mediumY,
+              rotate: rotateDeg,
+              borderColor: themeColors.ring
+            }}
+            className="absolute top-1/4 -right-16 md:right-10 w-64 h-64 md:w-96 md:h-96 rounded-full border border-dashed will-change-transform opacity-60"
+          />
+
+          {/* Parallax Layer D: Counter-Rotating Fine Ring (Cross-depth kinetic float) */}
+          <motion.div
+            style={{ 
+              y: mediumY,
+              rotate: counterRotateDeg,
+              borderColor: themeColors.ring
+            }}
+            className="absolute bottom-1/5 -left-12 md:left-14 w-48 h-48 md:w-72 md:h-72 rounded-full border will-change-transform opacity-50"
+          />
+        </div>
+      )}
+
+      {/* 2. Opening Neon Thread Divider Between Sections ("Fio de Luz se Abrindo") */}
+      {showDivider && (
+        <SectionTransitionDivider 
+          label={dividerLabel} 
+          theme={dividerTheme}
+        />
+      )}
+
+      {/* 3. Section Content with Staggered Text Entrance (relative z-10 for clean hierarchy above parallax background) */}
+      <motion.div
+        initial={
+          isHero || reducedMotion
+            ? { opacity: 1, scale: 1, y: 0 }
+            : { opacity: 0.4, scale: 0.96, y: 15 }
+        }
+        whileInView={{
+          opacity: 1,
+          scale: 1,
+          y: 0
+        }}
+        onViewportEnter={() => setIsInView(true)}
+        onViewportLeave={() => {
+          if (!isHero) setIsInView(false);
+        }}
+        viewport={{ once: false, amount: 0.05 }}
+        transition={{
+          duration: 0.85,
+          ease: [0.16, 1, 0.3, 1]
+        }}
+        className={`w-full relative z-10 ${
+          isInView ? "section-stagger-active" : "section-stagger-idle"
+        } ${isHero ? "section-stagger-hero" : ""} ${className}`}
+      >
         {children}
-      </div>
+      </motion.div>
     </div>
   );
 }
 
 const DEFAULT_SECTIONS = [
-  { id: "hero", name: "Hero Section", visible: true, zIndex: 10, effect: "hero" },
-  { id: "classes-events", name: "Weekly Classes & Events", visible: true, zIndex: 20, effect: "slide-left" },
-  { id: "hainan", name: "Hainan Zouk Marathon", visible: true, zIndex: 30, effect: "zoom-in" },
-  { id: "media", name: "Media & Gallery", visible: true, zIndex: 40, effect: "zoom-out" },
-  { id: "about", name: "About Us", visible: true, zIndex: 50, effect: "zoom-in" },
-  { id: "news", name: "News & Articles", visible: true, zIndex: 60, effect: "slide-right" },
-  { id: "contact", name: "Contact & Booking", visible: true, zIndex: 70, effect: "3d-rise" }
+  { id: "hero", name: "Hero Section", visible: true, zIndex: 10, effect: "fade" },
+  { id: "classes-events", name: "Weekly Classes & Events", visible: true, zIndex: 20, effect: "fade" },
+  { id: "hainan", name: "Hainan Zouk Marathon", visible: true, zIndex: 30, effect: "fade" },
+  { id: "media", name: "Media & Gallery", visible: true, zIndex: 40, effect: "fade" },
+  { id: "about", name: "About Us", visible: true, zIndex: 50, effect: "fade" },
+  { id: "news", name: "News & Articles", visible: true, zIndex: 60, effect: "fade" },
+  { id: "contact", name: "Contact & Booking", visible: true, zIndex: 70, effect: "fade" }
 ];
 
 export default function App() {
@@ -329,59 +471,123 @@ export default function App() {
 
       {currentPage === "home" ? (
         /* Main Page Layout */
-        <main className="relative">
-          {sectionsLayout
-            .filter((sec: any) => sec.visible !== false)
-            .map((sec: any, index: number) => {
-              const computedZIndex = (index + 1) * 10;
-              switch (sec.id) {
-                case "hero":
-                  return (
-                    <ScrollSection key="hero" zIndex={computedZIndex} effect={sec.effect}>
-                      <Hero />
-                    </ScrollSection>
-                  );
-                case "about":
-                  return (
-                    <ScrollSection key="about" zIndex={computedZIndex} effect={sec.effect}>
-                      <About />
-                    </ScrollSection>
-                  );
-                case "classes-events":
-                  return (
-                    <ScrollSection key="classes-events" zIndex={computedZIndex} effect={sec.effect}>
-                      <ClassesEvents onSelectClass={handleSelectClass} />
-                    </ScrollSection>
-                  );
-                case "media":
-                  return (
-                    <ScrollSection key="media" zIndex={computedZIndex} effect={sec.effect}>
-                      <Media />
-                    </ScrollSection>
-                  );
-                case "news":
-                  return (
-                    <ScrollSection key="news" zIndex={computedZIndex} effect={sec.effect}>
-                      <News />
-                    </ScrollSection>
-                  );
-                case "hainan":
-                  return (
-                    <ScrollSection key="hainan" zIndex={computedZIndex} effect={sec.effect}>
-                      <HainanMarathon />
-                    </ScrollSection>
-                  );
-                case "contact":
-                  return (
-                    <ScrollSection key="contact" zIndex={computedZIndex} effect={sec.effect}>
-                      <Contact selectedClass={selectedClass} />
-                    </ScrollSection>
-                  );
-                default:
-                  return null;
-              }
-            })}
-        </main>
+        <>
+          {/* Subtle cursor dance particle & ribbon trail */}
+          <DanceParticleTrail />
+
+          {/* Desktop Floating Scroll Radar Navigator */}
+          <ScrollRadar />
+
+          <main className="relative">
+            {sectionsLayout
+              .filter((sec: any) => sec.visible !== false)
+              .map((sec: any, index: number) => {
+                const computedZIndex = (index + 1) * 10;
+                const isNotFirst = index > 0;
+
+                switch (sec.id) {
+                  case "hero":
+                    return (
+                      <ScrollSection 
+                        id="home"
+                        key="hero" 
+                        zIndex={computedZIndex} 
+                        effect={sec.effect}
+                        showDivider={false}
+                      >
+                        <Hero />
+                      </ScrollSection>
+                    );
+                  case "about":
+                    return (
+                      <ScrollSection 
+                        id="about"
+                        key="about" 
+                        zIndex={computedZIndex} 
+                        effect={sec.effect}
+                        showDivider={isNotFirst}
+                        dividerLabel="Our Story • FusionDance & Philosophy"
+                        dividerTheme="sage"
+                      >
+                        <About />
+                      </ScrollSection>
+                    );
+                  case "classes-events":
+                    return (
+                      <ScrollSection 
+                        id="classes-events"
+                        key="classes-events" 
+                        zIndex={computedZIndex} 
+                        effect={sec.effect}
+                        showDivider={isNotFirst}
+                        dividerLabel="Classes & Workshops • Soulzouk HK"
+                        dividerTheme="gold"
+                      >
+                        <ClassesEvents onSelectClass={handleSelectClass} />
+                      </ScrollSection>
+                    );
+                  case "media":
+                    return (
+                      <ScrollSection 
+                        id="media"
+                        key="media" 
+                        zIndex={computedZIndex} 
+                        effect={sec.effect}
+                        showDivider={isNotFirst}
+                        dividerLabel="Moments in Motion • Media Gallery"
+                        dividerTheme="gold"
+                      >
+                        <Media />
+                      </ScrollSection>
+                    );
+                  case "news":
+                    return (
+                      <ScrollSection 
+                        id="news"
+                        key="news" 
+                        zIndex={computedZIndex} 
+                        effect={sec.effect}
+                        showDivider={isNotFirst}
+                        dividerLabel="Articles & Community • News & Tips"
+                        dividerTheme="gold"
+                      >
+                        <News />
+                      </ScrollSection>
+                    );
+                  case "hainan":
+                    return (
+                      <ScrollSection 
+                        id="hainan"
+                        key="hainan" 
+                        zIndex={computedZIndex} 
+                        effect={sec.effect}
+                        showDivider={isNotFirst}
+                        dividerLabel="Tropical Paradise • Hainan Marathon 2027"
+                        dividerTheme="amber"
+                      >
+                        <HainanMarathon />
+                      </ScrollSection>
+                    );
+                  case "contact":
+                    return (
+                      <ScrollSection 
+                        id="contact"
+                        key="contact" 
+                        zIndex={computedZIndex} 
+                        effect={sec.effect}
+                        showDivider={isNotFirst}
+                        dividerLabel="Book Your Class • Connect with Us"
+                        dividerTheme="gold"
+                      >
+                        <Contact selectedClass={selectedClass} />
+                      </ScrollSection>
+                    );
+                  default:
+                    return null;
+                }
+              })}
+          </main>
+        </>
       ) : (
         renderSubPage()
       )}

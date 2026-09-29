@@ -44,50 +44,40 @@ export default function About() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.1 }}
-          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center max-w-3xl mx-auto mb-12 md:mb-16"
-        >
+        <div className="text-center max-w-3xl mx-auto mb-12 md:mb-16">
           <div className="inline-flex items-center space-x-2 bg-[#3b3f3a]/5 border border-[#3b3f3a]/10 px-3.5 py-1.5 rounded-full mb-4">
             <Sparkles className="w-3.5 h-3.5 text-[#f6c86b]" />
             <span className="font-montserrat text-[10px] font-bold tracking-widest text-[#3b3f3a]/80 uppercase">
-              {content.title}
+              {content.title || "About Us"}
             </span>
           </div>
           <h2 className="font-display text-3.5xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 text-[#3b3f3a] uppercase title-emboss-darktext">
-            Meet Our School
+            {content.headerTitle || "Meet Our School"}
           </h2>
           <p className="font-sans text-sm sm:text-base text-[#3b3f3a]/70 font-light max-w-xl mx-auto">
             {content.subtitle}
           </p>
-        </motion.div>
+        </div>
 
         {/* Story Section & School philosophy */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center mb-16">
           
           {/* Left: Philosophy & story */}
-          <motion.div 
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.1 }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-7 space-y-6"
-          >
+          <div className="lg:col-span-7 space-y-6">
             <span className="font-montserrat text-xs font-bold uppercase tracking-wider text-[#9bb08a]">
-              Our Philosophy
+              {content.philosophyTag || "Our Philosophy"}
             </span>
             <h3 className="font-display text-3xl font-bold text-[#3b3f3a] tracking-tight leading-tight">
-              {content.storyTitle}
+              {content.storyTitle || "Our Story"}
             </h3>
             <p className="font-sans text-[#3b3f3a]/80 text-sm sm:text-base leading-relaxed font-light">
               {content.storyText1}
             </p>
-            <p className="font-sans text-[#3b3f3a]/80 text-sm sm:text-base leading-relaxed font-light">
-              {content.storyText2}
-            </p>
+            {content.storyText2 && (
+              <p className="font-sans text-[#3b3f3a]/80 text-sm sm:text-base leading-relaxed font-light">
+                {content.storyText2}
+              </p>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
               <div className="flex items-start space-x-3">
@@ -95,8 +85,12 @@ export default function About() {
                   <Check className="w-3.5 h-3.5 stroke-[3px]" />
                 </div>
                 <div>
-                  <h4 className="font-montserrat text-xs font-bold uppercase tracking-wider text-[#3b3f3a]">Active Connection</h4>
-                  <p className="font-sans text-xs text-[#3b3f3a]/70 mt-0.5">Learn to communicate with direct, clear, non-verbal body language.</p>
+                  <h4 className="font-montserrat text-xs font-bold uppercase tracking-wider text-[#3b3f3a]">
+                    {content.pillar1Title || "Active Connection"}
+                  </h4>
+                  <p className="font-sans text-xs text-[#3b3f3a]/70 mt-0.5">
+                    {content.pillar1Text || "Learn to communicate with direct, clear, non-verbal body language."}
+                  </p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
@@ -104,12 +98,16 @@ export default function About() {
                   <Check className="w-3.5 h-3.5 stroke-[3px]" />
                 </div>
                 <div>
-                  <h4 className="font-montserrat text-xs font-bold uppercase tracking-wider text-[#3b3f3a]">Healthy Biomechanics</h4>
-                  <p className="font-sans text-xs text-[#3b3f3a]/70 mt-0.5">Dance naturally with a healthy posture and fluid spin dynamics.</p>
+                  <h4 className="font-montserrat text-xs font-bold uppercase tracking-wider text-[#3b3f3a]">
+                    {content.pillar2Title || "Healthy Biomechanics"}
+                  </h4>
+                  <p className="font-sans text-xs text-[#3b3f3a]/70 mt-0.5">
+                    {content.pillar2Text || "Dance naturally with a healthy posture and fluid spin dynamics."}
+                  </p>
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Right: Stats Grid */}
           <motion.div 
@@ -146,32 +144,42 @@ export default function About() {
             className="text-center mb-10"
           >
             <span className="font-montserrat text-xs font-bold uppercase tracking-widest text-[#9bb08a] bg-[#9bb08a]/10 px-3.5 py-1.5 rounded-full border border-[#9bb08a]/20">
-              The Founders & Master Instructors
+              {content.foundersEyebrow || "The Founders & Master Instructors"}
             </span>
             <h3 className="font-display text-3xl sm:text-4xl font-extrabold text-[#3b3f3a] uppercase mt-3">
-              Meet Xina & Laura
+              {content.foundersTitle || "Meet Xina & Laura"}
             </h3>
             <p className="font-sans text-sm text-[#3b3f3a]/75 font-normal max-w-xl mx-auto mt-2 leading-relaxed">
-              World-class dancer-educators bringing authentic Brazilian Zouk, Lambada, and Samba technique to the Hong Kong dance community.
+              {content.foundersSubtitle || "World-class dancer-educators bringing authentic Brazilian Zouk, Lambada, and Samba technique to the Hong Kong dance community."}
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
             {content.founders?.map((founder: any, idx: number) => {
-              const defaultSpecialties = founder.name.toLowerCase().includes("xina")
+              const defaultSpecialties = founder.name?.toLowerCase().includes("xina")
                 ? ["Brazilian Zouk", "Classic Lambada", "Biomechanics & Technique", "Body Isolations"]
                 : ["Samba de Gafieira", "Zouk Styling & Cambré", "Lead & Follow Connection", "Musicality"];
               
-              const specialties = founder.specialties || defaultSpecialties;
-              const quote = founder.quote || (founder.name.toLowerCase().includes("xina") 
+              let specialties: string[] = defaultSpecialties;
+              if (Array.isArray(founder.specialties)) {
+                specialties = founder.specialties;
+              } else if (typeof founder.specialties === "string" && founder.specialties.trim().length > 0) {
+                try {
+                  specialties = JSON.parse(founder.specialties);
+                } catch {
+                  specialties = founder.specialties.split(",").map((s: string) => s.trim()).filter(Boolean);
+                }
+              }
+
+              const quote = founder.quote || (founder.name?.toLowerCase().includes("xina") 
                 ? "Dance is a physical dialogue of mutual trust, energy, and freedom."
                 : "True partnership begins when you listen with your whole body.");
 
               const socials = founder.socials || {
-                instagram: "https://instagram.com/2indance",
-                facebook: "https://facebook.com/2indance",
-                youtube: "https://youtube.com/@2indance",
-                whatsapp: "https://wa.me/85291234567"
+                instagram: founder.instagram || "https://instagram.com/2indance",
+                facebook: founder.facebook || "https://facebook.com/2indance",
+                youtube: founder.youtube || "https://youtube.com/@2indance",
+                whatsapp: founder.whatsapp || "https://wa.me/85291234567"
               };
 
               return (
@@ -326,11 +334,11 @@ export default function About() {
           <span className="absolute top-2 left-6 font-display text-7xl text-[#f6c86b]/10 select-none">“</span>
           
           <p className="font-display italic text-base sm:text-lg text-[#fff6da]/90 relative z-10 leading-relaxed font-light text-center max-w-2xl mx-auto">
-            "Dance isn't about perfect execution. It's about authentic conversation on the floor—the dialogue that occurs in the quiet spaces between the beats."
+            "{content.signatureQuote || "Dance isn't about perfect execution. It's about authentic conversation on the floor—the dialogue that occurs in the quiet spaces between the beats."}"
           </p>
           
           <p className="font-montserrat text-[10px] font-bold uppercase text-[#f6c86b] tracking-widest mt-4 text-center">
-            — Xina & Laura
+            {content.signatureAuthor || "— Xina & Laura"}
           </p>
         </motion.div>
 

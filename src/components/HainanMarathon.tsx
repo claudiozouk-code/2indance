@@ -42,6 +42,76 @@ export default function HainanMarathon() {
   const roomImage = frontpage.hainan_room_image || roomImageDefault;
   const beachImage = frontpage.hainan_beach_image || beachImageDefault;
 
+  // Renders the section title with vibrant, tropical, high-contrast colors
+  const renderTitle = (rawTitle: string, theme: string = "tropical") => {
+    const title = (rawTitle || "Hainan Island Zouk Marathon").trim();
+
+    if (theme === "gold") {
+      return (
+        <span className="bg-gradient-to-r from-[#FFFDF0] via-[#F6C86B] to-[#E5A045] bg-clip-text text-transparent drop-shadow-[0_2px_14px_rgba(246,200,107,0.35)]">
+          {title}
+        </span>
+      );
+    }
+
+    if (theme === "ocean") {
+      return (
+        <span className="bg-gradient-to-r from-[#67E8F9] via-[#2DD4BF] to-[#86EFAC] bg-clip-text text-transparent drop-shadow-[0_2px_14px_rgba(45,212,191,0.35)]">
+          {title}
+        </span>
+      );
+    }
+
+    if (theme === "sunset") {
+      return (
+        <span className="bg-gradient-to-r from-[#FF8A65] via-[#F6C86B] to-[#FFE6A6] bg-clip-text text-transparent drop-shadow-[0_2px_14px_rgba(255,138,101,0.35)]">
+          {title}
+        </span>
+      );
+    }
+
+    if (theme === "emerald") {
+      return (
+        <span className="bg-gradient-to-r from-[#6EE7B7] via-[#10B981] to-[#F6C86B] bg-clip-text text-transparent drop-shadow-[0_2px_14px_rgba(110,231,183,0.35)]">
+          {title}
+        </span>
+      );
+    }
+
+    // Default: "tropical" duo-tone gradient (Golden Tropical Sun + Ocean Turquoise)
+    const words = title.split(" ");
+    if (words.length >= 2) {
+      const lower = title.toLowerCase();
+      let splitIndex = 2;
+      if (lower.includes("island")) {
+        const islandIdx = words.findIndex((w) => w.toLowerCase().includes("island"));
+        splitIndex = islandIdx + 1;
+      } else {
+        splitIndex = Math.ceil(words.length / 2);
+      }
+
+      const part1 = words.slice(0, splitIndex).join(" ");
+      const part2 = words.slice(splitIndex).join(" ");
+
+      return (
+        <>
+          <span className="inline-block bg-gradient-to-r from-[#FFF6DA] via-[#F6C86B] to-[#FFA726] bg-clip-text text-transparent drop-shadow-[0_2px_14px_rgba(246,200,107,0.4)] mr-2.5">
+            {part1}
+          </span>
+          <span className="inline-block bg-gradient-to-r from-[#5EEAD4] via-[#2DD4BF] to-[#86EFAC] bg-clip-text text-transparent drop-shadow-[0_2px_14px_rgba(45,212,191,0.4)]">
+            {part2}
+          </span>
+        </>
+      );
+    }
+
+    return (
+      <span className="bg-gradient-to-r from-[#FFF6DA] via-[#F6C86B] via-45%-[#5EEAD4] to-[#2DD4BF] bg-clip-text text-transparent drop-shadow-[0_2px_14px_rgba(45,212,191,0.35)]">
+        {title}
+      </span>
+    );
+  };
+
   useEffect(() => {
     fetch("/api/frontpage")
       .then((res) => res.json())
@@ -83,17 +153,17 @@ export default function HainanMarathon() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* SECTION HEADER */}
-        <div className="text-center max-w-3xl mx-auto mb-14 md:mb-18">
-          <div className="inline-flex items-center space-x-2 bg-[#f6c86b]/10 border border-[#f6c86b]/20 px-3.5 py-1.5 rounded-full mb-4">
-            <Sparkles className="w-3.5 h-3.5 text-[#f6c86b]" />
-            <span className="font-montserrat text-[10px] font-bold tracking-widest text-[#ffe6a6] uppercase">
+        <div className="text-center max-w-4xl mx-auto mb-14 md:mb-18">
+          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-[#f6c86b]/15 to-[#2dd4bf]/15 border border-[#5eead4]/30 px-3.5 py-1.5 rounded-full mb-4 shadow-[0_0_15px_rgba(45,212,191,0.15)]">
+            <Sparkles className="w-3.5 h-3.5 text-[#5eead4]" />
+            <span className="font-montserrat text-[10px] font-bold tracking-widest bg-gradient-to-r from-[#ffe6a6] via-[#f6c86b] to-[#5eead4] bg-clip-text text-transparent uppercase">
               {frontpage.hainan_badge || "Featured Global Event • March 2027"}
             </span>
           </div>
-          <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-4 bg-gradient-to-r from-[#fff6da] via-[#ffe6a6] to-[#f6c86b] bg-clip-text text-transparent uppercase title-emboss">
-            {frontpage.hainan_title || "Hainan Island Zouk Marathon"}
+          <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-4 uppercase">
+            {renderTitle(frontpage.hainan_title, frontpage.hainan_title_theme)}
           </h2>
-          <div className="h-1 w-24 bg-gradient-to-r from-transparent via-[#f6c86b] to-transparent mx-auto mb-5" />
+          <div className="h-1 w-32 bg-gradient-to-r from-transparent via-[#f6c86b] via-50%-[#2dd4bf] to-transparent mx-auto mb-5 rounded-full shadow-[0_0_12px_rgba(45,212,191,0.5)]" />
           <p className="font-sans text-sm sm:text-base text-[#fff6da]/85 font-light max-w-2xl mx-auto italic">
             "{frontpage.hainan_quote || "Hainan Island — China's tropical paradise. White-sand beaches, green mountains, fresh seafood, and vibrant reefs set the stage for endless adventures, unforgettable nights of dance, and the taste of local flavors."}"
           </p>

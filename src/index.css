@@ -63,3 +63,92 @@
 html {
   scroll-behavior: smooth;
 }
+
+/* Glowing Laser Thread Animations & Dynamic Scroll Utilities */
+@keyframes laserPulse {
+  0%, 100% {
+    opacity: 0.6;
+    filter: drop-shadow(0 0 6px rgba(246, 200, 107, 0.4));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 14px rgba(246, 200, 107, 0.85));
+  }
+}
+
+.laser-thread-pulse {
+  animation: laserPulse 4s ease-in-out infinite;
+}
+
+/* Modern Dynamic Ambient Section Backdrop */
+.section-ambient-mesh {
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(246, 200, 107, 0.05) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(155, 176, 138, 0.06) 0px, transparent 50%);
+}
+
+/* ==========================================================================
+   Staggered Text Entrance Animation for ScrollSections
+   ========================================================================== */
+@keyframes sectionTextFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 1. Eyebrow badge / tag pill: reveals first */
+.section-stagger-active:not(.section-stagger-hero) .max-w-7xl .inline-flex.items-center.rounded-full {
+  animation: sectionTextFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+  will-change: transform, opacity;
+}
+
+/* 2. Main section headline (h2): cascades in smoothly */
+.section-stagger-active:not(.section-stagger-hero) .max-w-7xl h2 {
+  animation: sectionTextFadeUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.18s both;
+  will-change: transform, opacity;
+}
+
+/* 3. Subtitle / paragraph text: smoothly follows the title */
+.section-stagger-active:not(.section-stagger-hero) .max-w-7xl h2 ~ p,
+.section-stagger-active:not(.section-stagger-hero) .max-w-7xl .text-center > p,
+.section-stagger-active:not(.section-stagger-hero) .max-w-7xl .max-w-2xl > p {
+  animation: sectionTextFadeUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.26s both;
+  will-change: transform, opacity;
+}
+
+/* 4. Secondary subheadings (h3) and details */
+.section-stagger-active:not(.section-stagger-hero) .max-w-7xl h3 {
+  animation: sectionTextFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.34s both;
+  will-change: transform, opacity;
+}
+
+/* Idle state before in-view to prevent flash before animation starts */
+.section-stagger-idle:not(.section-stagger-hero) .max-w-7xl .inline-flex.items-center.rounded-full,
+.section-stagger-idle:not(.section-stagger-hero) .max-w-7xl h2,
+.section-stagger-idle:not(.section-stagger-hero) .max-w-7xl h2 ~ p,
+.section-stagger-idle:not(.section-stagger-hero) .max-w-7xl .text-center > p,
+.section-stagger-idle:not(.section-stagger-hero) .max-w-7xl .max-w-2xl > p,
+.section-stagger-idle:not(.section-stagger-hero) .max-w-7xl h3 {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+/* Accessibility: Disable when user prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .section-stagger-active:not(.section-stagger-hero) .max-w-7xl .inline-flex.items-center.rounded-full,
+  .section-stagger-active:not(.section-stagger-hero) .max-w-7xl h2,
+  .section-stagger-active:not(.section-stagger-hero) .max-w-7xl h2 ~ p,
+  .section-stagger-active:not(.section-stagger-hero) .max-w-7xl .text-center > p,
+  .section-stagger-active:not(.section-stagger-hero) .max-w-7xl .max-w-2xl > p,
+  .section-stagger-active:not(.section-stagger-hero) .max-w-7xl h3,
+  .section-stagger-idle:not(.section-stagger-hero) * {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

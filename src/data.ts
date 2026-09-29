@@ -89,9 +89,20 @@ export const brandDetails = {
 export const aboutContent = {
   title: "About Us",
   subtitle: "Meet the founders and team behind 2inDance",
+  headerTitle: "Meet Our School",
+  philosophyTag: "Our Philosophy",
   storyTitle: "Our Story",
   storyText1: "Founded by Xina and Laura, 2inDance was born out of a shared passion for partner dancing and a vision to make Brazilian rhythms accessible, beautiful, and deeply connected. Specializing in Brazilian Zouk, Lambada, and Samba, Xina and Laura bring years of training, performance, and international teaching experience directly to the heart of Hong Kong.",
   storyText2: "The philosophy of 2inDance (2 in Dance) centers entirely around the conversation that happens between two people on the dance floor. It's not just about learning steps; it's about developing an active body dialogue, healthy mechanics, and mutual trust. Whether you're taking your very first step or refining advanced head movements, 2inDance offers an inspiring space where music meets community.",
+  pillar1Title: "Active Connection",
+  pillar1Text: "Learn to communicate with direct, clear, non-verbal body language.",
+  pillar2Title: "Healthy Biomechanics",
+  pillar2Text: "Dance naturally with a healthy posture and fluid spin dynamics.",
+  foundersEyebrow: "The Founders & Master Instructors",
+  foundersTitle: "Meet Xina & Laura",
+  foundersSubtitle: "World-class dancer-educators bringing authentic Brazilian Zouk, Lambada, and Samba technique to the Hong Kong dance community.",
+  signatureQuote: "Dance isn't about perfect execution. It's about authentic conversation on the floor—the dialogue that occurs in the quiet spaces between the beats.",
+  signatureAuthor: "— Xina & Laura",
   founders: [
     {
       id: "f-1",

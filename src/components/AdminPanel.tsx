@@ -55,6 +55,7 @@ const DEFAULT_FRONTPAGE = {
   hero_cta_secondary: "Explore Classes",
   hainan_badge: "Featured Global Event • March 2027",
   hainan_title: "Hainan Island Zouk Marathon",
+  hainan_title_theme: "tropical",
   hainan_quote: "Hainan Island — China's tropical paradise. White-sand beaches, green mountains, fresh seafood, and vibrant reefs set the stage for endless adventures, unforgettable nights of dance, and the taste of local flavors.",
   hainan_link: "https://hainanzouk.2indance.com",
   social_instagram: "https://instagram.com/2indance",
@@ -82,13 +83,13 @@ const DEFAULT_FRONTPAGE = {
 };
 
 const DEFAULT_SECTIONS = [
-  { id: "hero", name: "Hero Section", visible: true, zIndex: 10, effect: "hero" },
-  { id: "classes-events", name: "Weekly Classes & Events", visible: true, zIndex: 20, effect: "slide-left" },
-  { id: "hainan", name: "Hainan Zouk Marathon", visible: true, zIndex: 30, effect: "zoom-in" },
-  { id: "media", name: "Media & Gallery", visible: true, zIndex: 40, effect: "zoom-out" },
-  { id: "about", name: "About Us", visible: true, zIndex: 50, effect: "zoom-in" },
-  { id: "news", name: "News & Articles", visible: true, zIndex: 60, effect: "slide-right" },
-  { id: "contact", name: "Contact & Booking", visible: true, zIndex: 70, effect: "3d-rise" }
+  { id: "hero", name: "Hero Section", visible: true, zIndex: 10, effect: "fade" },
+  { id: "classes-events", name: "Weekly Classes & Events", visible: true, zIndex: 20, effect: "fade" },
+  { id: "hainan", name: "Hainan Zouk Marathon", visible: true, zIndex: 30, effect: "fade" },
+  { id: "media", name: "Media & Gallery", visible: true, zIndex: 40, effect: "fade" },
+  { id: "about", name: "About Us", visible: true, zIndex: 50, effect: "fade" },
+  { id: "news", name: "News & Articles", visible: true, zIndex: 60, effect: "fade" },
+  { id: "contact", name: "Contact & Booking", visible: true, zIndex: 70, effect: "fade" }
 ];
 
 export default function AdminPanel() {
@@ -230,7 +231,19 @@ export default function AdminPanel() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Form Field States
-  const [founderForm, setFounderForm] = useState({ id: "", name: "", role: "", bio: "", image: "" });
+  const [founderForm, setFounderForm] = useState({
+    id: "",
+    name: "",
+    role: "",
+    bio: "",
+    image: "",
+    quote: "",
+    specialties: "",
+    instagram: "",
+    facebook: "",
+    youtube: "",
+    whatsapp: ""
+  });
   const [scheduleForm, setScheduleForm] = useState({ id: "", day: "Monday", time: "", style: "", level: "", location: "", price: "" });
   const [eventForm, setEventForm] = useState({ id: "", title: "", date: "", time: "", location: "", description: "", image: "", price: "" });
   const [mediaForm, setMediaForm] = useState({ id: "", type: "photo", title: "", thumbnail: "", url: "", category: "Class Highlight" });
@@ -460,10 +473,22 @@ export default function AdminPanel() {
     e.preventDefault();
     const payload = {
       title: aboutData.title,
+      headerTitle: aboutData.headerTitle || "Meet Our School",
       subtitle: aboutData.subtitle,
-      storyTitle: aboutData.storyTitle,
+      philosophyTag: aboutData.philosophyTag || "Our Philosophy",
+      storyTitle: aboutData.storyTitle || "Our Story",
       storyText1: aboutData.storyText1,
       storyText2: aboutData.storyText2,
+      pillar1Title: aboutData.pillar1Title || "Active Connection",
+      pillar1Text: aboutData.pillar1Text || "Learn to communicate with direct, clear, non-verbal body language.",
+      pillar2Title: aboutData.pillar2Title || "Healthy Biomechanics",
+      pillar2Text: aboutData.pillar2Text || "Dance naturally with a healthy posture and fluid spin dynamics.",
+      foundersEyebrow: aboutData.foundersEyebrow || "The Founders & Master Instructors",
+      foundersTitle: aboutData.foundersTitle || "Meet Xina & Laura",
+      foundersSubtitle: aboutData.foundersSubtitle || "World-class dancer-educators bringing authentic Brazilian Zouk, Lambada, and Samba technique to the Hong Kong dance community.",
+      signatureQuote: aboutData.signatureQuote || "Dance isn't about perfect execution. It's about authentic conversation on the floor—the dialogue that occurs in the quiet spaces between the beats.",
+      signatureAuthor: aboutData.signatureAuthor || "— Xina & Laura",
+      stats: aboutData.stats || [],
       founders: aboutData.founders || []
     };
     localStorage.setItem("admin_about_data", JSON.stringify(payload));
@@ -475,7 +500,7 @@ export default function AdminPanel() {
       });
       const ct = res.headers.get("content-type") || "";
       if (res.ok && ct.includes("application/json")) {
-        triggerAlert("success", "Conteúdo 'About Us' atualizado com sucesso!");
+        triggerAlert("success", "Todo o conteúdo da página About Us foi salvo com sucesso!");
         fetchAllData();
       } else {
         triggerAlert("success", "Conteúdo 'About Us' salvo com sucesso! (Modo Seguro)");
@@ -485,20 +510,63 @@ export default function AdminPanel() {
     }
   };
 
+  // --- STATS EDITING HELPERS ---
+  const handleAddStat = () => {
+    const currentStats = Array.isArray(aboutData.stats) ? [...aboutData.stats] : [];
+    currentStats.push({ num: "10+", label: "New Milestone" });
+    setAboutData({ ...aboutData, stats: currentStats });
+  };
+
+  const handleUpdateStat = (index: number, field: "num" | "label", val: string) => {
+    const currentStats = Array.isArray(aboutData.stats) ? [...aboutData.stats] : [];
+    if (currentStats[index]) {
+      currentStats[index] = { ...currentStats[index], [field]: val };
+      setAboutData({ ...aboutData, stats: currentStats });
+    }
+  };
+
+  const handleDeleteStat = (index: number) => {
+    const currentStats = Array.isArray(aboutData.stats) ? [...aboutData.stats] : [];
+    currentStats.splice(index, 1);
+    setAboutData({ ...aboutData, stats: currentStats });
+  };
+
   // --- FOUNDERS CRUD ---
   const handleOpenFounderModal = (item: any = null) => {
     if (item) {
       setEditingItem(item);
+      let specs = item.specialties;
+      if (Array.isArray(specs)) specs = specs.join(", ");
+      const socials = item.socials || {};
+
       setFounderForm({
         id: item.id || "",
-        name: item.name,
-        role: item.role,
-        bio: item.bio,
-        image: item.image
+        name: item.name || "",
+        role: item.role || "",
+        bio: item.bio || "",
+        image: item.image || "",
+        quote: item.quote || "",
+        specialties: specs || "",
+        instagram: item.instagram || socials.instagram || "",
+        facebook: item.facebook || socials.facebook || "",
+        youtube: item.youtube || socials.youtube || "",
+        whatsapp: item.whatsapp || socials.whatsapp || ""
       });
     } else {
       setEditingItem(null);
-      setFounderForm({ id: "", name: "", role: "", bio: "", image: "" });
+      setFounderForm({
+        id: "",
+        name: "",
+        role: "",
+        bio: "",
+        image: "",
+        quote: "",
+        specialties: "",
+        instagram: "",
+        facebook: "",
+        youtube: "",
+        whatsapp: ""
+      });
     }
     setModalType("founder");
     setIsModalOpen(true);
@@ -1382,6 +1450,42 @@ export default function AdminPanel() {
                           />
                         </div>
 
+                        {/* SECTION TITLE COLOR THEME PICKER */}
+                        <div className="md:col-span-2 bg-black/20 border border-white/10 p-4 rounded-2xl">
+                          <label className="block text-xs font-semibold uppercase tracking-wider text-[#ffe6a6] mb-3 flex items-center justify-between">
+                            <span>Title Color Palette / Paleta de Cores do Título</span>
+                            <span className="text-[10px] font-mono text-[#f6c86b] uppercase bg-[#f6c86b]/10 px-2 py-0.5 rounded">
+                              Estilo Visual do Título
+                            </span>
+                          </label>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                            {[
+                              { id: "tropical", name: "Tropical Duo-Tone", sub: "Gold + Turquoise", gradient: "from-[#f6c86b] to-[#2dd4bf]" },
+                              { id: "gold", name: "Radiant Gold", sub: "Solar Imperial", gradient: "from-[#fffdf0] to-[#f6c86b]" },
+                              { id: "ocean", name: "Ocean Lagoon", sub: "Turquoise & Mint", gradient: "from-[#67e8f9] to-[#2dd4bf]" },
+                              { id: "sunset", name: "Sunset Coral", sub: "Warm Gold & Coral", gradient: "from-[#ff8a65] to-[#f6c86b]" },
+                              { id: "emerald", name: "Emerald Jade", sub: "Lush Tropical Green", gradient: "from-[#6ee7b7] to-[#10b981]" }
+                            ].map((preset) => (
+                              <button
+                                key={preset.id}
+                                type="button"
+                                onClick={() => setFrontpageForm({ ...frontpageForm, hainan_title_theme: preset.id })}
+                                className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                                  (frontpageForm.hainan_title_theme || "tropical") === preset.id
+                                    ? "border-[#f6c86b] bg-[#f6c86b]/15 shadow-md ring-1 ring-[#f6c86b]"
+                                    : "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
+                                }`}
+                              >
+                                <div className={`h-3 w-full rounded-md bg-gradient-to-r ${preset.gradient} mb-2 shadow-inner`} />
+                                <div>
+                                  <div className="text-xs font-bold text-white leading-tight">{preset.name}</div>
+                                  <div className="text-[10px] text-white/50">{preset.sub}</div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
                         <div className="md:col-span-2">
                           <label className="block text-xs font-semibold uppercase tracking-wider text-[#fff6da]/80 mb-2">
                             Marathon Slogan / Intro Quote
@@ -1847,130 +1951,444 @@ export default function AdminPanel() {
                   exit={{ opacity: 0 }}
                   className="space-y-8 text-left"
                 >
-                  <div>
-                    <h3 className="font-display text-2xl font-bold uppercase tracking-tight text-white mb-1">
-                      About Us Section Content
-                    </h3>
-                    <p className="text-xs text-[#fff6da]/70">
-                      Configure the title, subtitles, and story descriptions displayed on the frontend.
-                    </p>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/10 pb-4">
+                    <div>
+                      <h3 className="font-display text-2xl font-bold uppercase tracking-tight text-white mb-1">
+                        Gerenciar Todo o Conteúdo da Página About Us
+                      </h3>
+                      <p className="text-xs text-[#fff6da]/70">
+                        Edite todos os textos, títulos, pilares, estatísticas numéricas, fundadores com redes sociais e citação assinada.
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleSaveAboutContent}
+                      type="button"
+                      className="inline-flex items-center space-x-2 bg-[#f6c86b] hover:bg-[#ffe6a6] text-[#3b3f3a] font-montserrat text-xs font-bold tracking-widest uppercase px-6 py-3 rounded-xl transition-all duration-300 shadow-md cursor-pointer flex-shrink-0"
+                    >
+                      <Save className="w-4 h-4" />
+                      <span>Salvar Todo o Conteúdo</span>
+                    </button>
                   </div>
 
-                  <form onSubmit={handleSaveAboutContent} className="space-y-5 border-b border-white/10 pb-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      <div>
-                        <label className="text-xs font-montserrat font-bold uppercase tracking-wider text-[#ffe6a6]/80 block mb-1.5">Section Title</label>
-                        <input
-                          type="text"
-                          value={aboutData.title}
-                          onChange={(e) => setAboutData({ ...aboutData, title: e.target.value })}
-                          className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[#f6c86b]/60 transition-all font-sans"
-                        />
+                  <form onSubmit={handleSaveAboutContent} className="space-y-8">
+                    
+                    {/* SECTION 1: HEADER & SUBTITLE */}
+                    <div className="bg-white/5 border border-white/5 p-6 rounded-2xl space-y-5">
+                      <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                        <h4 className="font-montserrat text-sm font-bold tracking-wider text-[#ffe6a6] uppercase">
+                          1. Cabeçalho e Títulos da Seção
+                        </h4>
+                        <span className="text-[10px] font-mono text-[#f6c86b] uppercase bg-[#f6c86b]/10 px-2 py-0.5 rounded">
+                          Header Geral
+                        </span>
                       </div>
-                      <div>
-                        <label className="text-xs font-montserrat font-bold uppercase tracking-wider text-[#ffe6a6]/80 block mb-1.5">Section Subtitle</label>
-                        <input
-                          type="text"
-                          value={aboutData.subtitle}
-                          onChange={(e) => setAboutData({ ...aboutData, subtitle: e.target.value })}
-                          className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[#f6c86b]/60 transition-all font-sans"
-                        />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                          <label className="text-xs font-montserrat font-bold uppercase tracking-wider text-[#ffe6a6]/80 block mb-1.5">
+                            Tag Superior da Seção (Eyebrow Badge)
+                          </label>
+                          <input
+                            type="text"
+                            value={aboutData.title || ""}
+                            onChange={(e) => setAboutData({ ...aboutData, title: e.target.value })}
+                            className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[#f6c86b]/60 transition-all font-sans"
+                            placeholder="e.g. About Us"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-montserrat font-bold uppercase tracking-wider text-[#ffe6a6]/80 block mb-1.5">
+                            Título Principal em Destaque (Headline)
+                          </label>
+                          <input
+                            type="text"
+                            value={aboutData.headerTitle || ""}
+                            onChange={(e) => setAboutData({ ...aboutData, headerTitle: e.target.value })}
+                            className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[#f6c86b]/60 transition-all font-sans"
+                            placeholder="e.g. Meet Our School"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="text-xs font-montserrat font-bold uppercase tracking-wider text-[#ffe6a6]/80 block mb-1.5">
+                            Subtítulo Descritivo
+                          </label>
+                          <input
+                            type="text"
+                            value={aboutData.subtitle || ""}
+                            onChange={(e) => setAboutData({ ...aboutData, subtitle: e.target.value })}
+                            className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[#f6c86b]/60 transition-all font-sans"
+                            placeholder="e.g. Meet the founders and team behind 2inDance"
+                          />
+                        </div>
                       </div>
                     </div>
 
-                    <div>
-                      <label className="text-xs font-montserrat font-bold uppercase tracking-wider text-[#ffe6a6]/80 block mb-1.5">Philosophy/Story Title</label>
-                      <input
-                        type="text"
-                        value={aboutData.storyTitle}
-                        onChange={(e) => setAboutData({ ...aboutData, storyTitle: e.target.value })}
-                        className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[#f6c86b]/60 transition-all font-sans"
-                      />
+                    {/* SECTION 2: PHILOSOPHY & STORY */}
+                    <div className="bg-white/5 border border-white/5 p-6 rounded-2xl space-y-5">
+                      <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                        <h4 className="font-montserrat text-sm font-bold tracking-wider text-[#ffe6a6] uppercase">
+                          2. Filosofia da Escola & Nossa História
+                        </h4>
+                        <span className="text-[10px] font-mono text-[#f6c86b] uppercase bg-[#f6c86b]/10 px-2 py-0.5 rounded">
+                          Story & Philosophy
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                          <label className="text-xs font-montserrat font-bold uppercase tracking-wider text-[#ffe6a6]/80 block mb-1.5">
+                            Etiqueta da Filosofia
+                          </label>
+                          <input
+                            type="text"
+                            value={aboutData.philosophyTag || ""}
+                            onChange={(e) => setAboutData({ ...aboutData, philosophyTag: e.target.value })}
+                            className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[#f6c86b]/60 transition-all font-sans"
+                            placeholder="e.g. Our Philosophy"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-montserrat font-bold uppercase tracking-wider text-[#ffe6a6]/80 block mb-1.5">
+                            Título da História (Story Title)
+                          </label>
+                          <input
+                            type="text"
+                            value={aboutData.storyTitle || ""}
+                            onChange={(e) => setAboutData({ ...aboutData, storyTitle: e.target.value })}
+                            className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[#f6c86b]/60 transition-all font-sans"
+                            placeholder="e.g. Our Story"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="text-xs font-montserrat font-bold uppercase tracking-wider text-[#ffe6a6]/80 block mb-1.5">
+                            Primeiro Parágrafo da História
+                          </label>
+                          <textarea
+                            rows={3}
+                            value={aboutData.storyText1 || ""}
+                            onChange={(e) => setAboutData({ ...aboutData, storyText1: e.target.value })}
+                            className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[#f6c86b]/60 transition-all font-sans leading-relaxed"
+                            placeholder="História de fundação da escola..."
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="text-xs font-montserrat font-bold uppercase tracking-wider text-[#ffe6a6]/80 block mb-1.5">
+                            Segundo Parágrafo (Filosofia de Dança e Metodologia)
+                          </label>
+                          <textarea
+                            rows={3}
+                            value={aboutData.storyText2 || ""}
+                            onChange={(e) => setAboutData({ ...aboutData, storyText2: e.target.value })}
+                            className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[#f6c86b]/60 transition-all font-sans leading-relaxed"
+                            placeholder="A filosofia de 2inDance (dois na dança)..."
+                          />
+                        </div>
+                      </div>
                     </div>
 
-                    <div>
-                      <label className="text-xs font-montserrat font-bold uppercase tracking-wider text-[#ffe6a6]/80 block mb-1.5">Philosophy Description 1</label>
-                      <textarea
-                        rows={4}
-                        value={aboutData.storyText1}
-                        onChange={(e) => setAboutData({ ...aboutData, storyText1: e.target.value })}
-                        className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[#f6c86b]/60 transition-all font-sans leading-relaxed"
-                      />
+                    {/* SECTION 3: TEACHING PILLARS */}
+                    <div className="bg-white/5 border border-white/5 p-6 rounded-2xl space-y-5">
+                      <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                        <h4 className="font-montserrat text-sm font-bold tracking-wider text-[#ffe6a6] uppercase">
+                          3. Pilares de Ensino & Metodologia (Checkmarks)
+                        </h4>
+                        <span className="text-[10px] font-mono text-[#f6c86b] uppercase bg-[#f6c86b]/10 px-2 py-0.5 rounded">
+                          Pilares
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Pillar 1 */}
+                        <div className="bg-black/20 border border-white/5 p-4 rounded-xl space-y-3">
+                          <span className="text-xs font-montserrat font-bold text-[#f6c86b] uppercase tracking-wider block">
+                            Pilar 1
+                          </span>
+                          <div>
+                            <label className="text-[11px] font-bold text-white/80 block mb-1">Título do Pilar 1</label>
+                            <input
+                              type="text"
+                              value={aboutData.pillar1Title || ""}
+                              onChange={(e) => setAboutData({ ...aboutData, pillar1Title: e.target.value })}
+                              className="w-full bg-black/30 border border-white/10 rounded-lg py-2 px-3 text-sm text-white focus:outline-none focus:border-[#f6c86b]"
+                              placeholder="e.g. Active Connection"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[11px] font-bold text-white/80 block mb-1">Descrição do Pilar 1</label>
+                            <input
+                              type="text"
+                              value={aboutData.pillar1Text || ""}
+                              onChange={(e) => setAboutData({ ...aboutData, pillar1Text: e.target.value })}
+                              className="w-full bg-black/30 border border-white/10 rounded-lg py-2 px-3 text-sm text-white focus:outline-none focus:border-[#f6c86b]"
+                              placeholder="e.g. Learn to communicate with direct, clear, non-verbal body language."
+                            />
+                          </div>
+                        </div>
+
+                        {/* Pillar 2 */}
+                        <div className="bg-black/20 border border-white/5 p-4 rounded-xl space-y-3">
+                          <span className="text-xs font-montserrat font-bold text-[#f6c86b] uppercase tracking-wider block">
+                            Pilar 2
+                          </span>
+                          <div>
+                            <label className="text-[11px] font-bold text-white/80 block mb-1">Título do Pilar 2</label>
+                            <input
+                              type="text"
+                              value={aboutData.pillar2Title || ""}
+                              onChange={(e) => setAboutData({ ...aboutData, pillar2Title: e.target.value })}
+                              className="w-full bg-black/30 border border-white/10 rounded-lg py-2 px-3 text-sm text-white focus:outline-none focus:border-[#f6c86b]"
+                              placeholder="e.g. Healthy Biomechanics"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[11px] font-bold text-white/80 block mb-1">Descrição do Pilar 2</label>
+                            <input
+                              type="text"
+                              value={aboutData.pillar2Text || ""}
+                              onChange={(e) => setAboutData({ ...aboutData, pillar2Text: e.target.value })}
+                              className="w-full bg-black/30 border border-white/10 rounded-lg py-2 px-3 text-sm text-white focus:outline-none focus:border-[#f6c86b]"
+                              placeholder="e.g. Dance naturally with a healthy posture and fluid spin dynamics."
+                            />
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
-                    <div>
-                      <label className="text-xs font-montserrat font-bold uppercase tracking-wider text-[#ffe6a6]/80 block mb-1.5">Philosophy Description 2</label>
-                      <textarea
-                        rows={4}
-                        value={aboutData.storyText2}
-                        onChange={(e) => setAboutData({ ...aboutData, storyText2: e.target.value })}
-                        className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[#f6c86b]/60 transition-all font-sans leading-relaxed"
-                      />
+                    {/* SECTION 4: IMPACT STATS */}
+                    <div className="bg-white/5 border border-white/5 p-6 rounded-2xl space-y-5">
+                      <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                        <div>
+                          <h4 className="font-montserrat text-sm font-bold tracking-wider text-[#ffe6a6] uppercase">
+                            4. Estatísticas & Métricas de Impacto
+                          </h4>
+                          <p className="text-[11px] text-[#fff6da]/60">
+                            Cards de números e conquistas exibidos ao lado da história da escola.
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleAddStat}
+                          className="inline-flex items-center space-x-1.5 bg-[#9bb08a]/20 hover:bg-[#9bb08a]/30 border border-[#9bb08a]/30 text-[#fff6da] px-3 py-1.5 rounded-lg text-xs font-montserrat font-bold uppercase transition-all cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5 text-[#f6c86b]" />
+                          <span>Adicionar Métrica</span>
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {(aboutData.stats || []).map((stat: any, sIdx: number) => (
+                          <div key={sIdx} className="bg-black/20 border border-white/10 p-4 rounded-xl space-y-3 relative group">
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteStat(sIdx)}
+                              className="absolute top-2 right-2 text-white/40 hover:text-red-400 p-1 transition-colors"
+                              title="Remover Métrica"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                            <div>
+                              <label className="text-[10px] font-bold text-white/70 block mb-1">Número / Destaque</label>
+                              <input
+                                type="text"
+                                value={stat.num || ""}
+                                onChange={(e) => handleUpdateStat(sIdx, "num", e.target.value)}
+                                className="w-full bg-black/40 border border-white/10 rounded-lg py-1.5 px-2.5 text-base font-bold text-[#f6c86b] focus:outline-none focus:border-[#f6c86b]"
+                                placeholder="20+"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-bold text-white/70 block mb-1">Rótulo / Descrição</label>
+                              <input
+                                type="text"
+                                value={stat.label || ""}
+                                onChange={(e) => handleUpdateStat(sIdx, "label", e.target.value)}
+                                className="w-full bg-black/40 border border-white/10 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none focus:border-[#f6c86b]"
+                                placeholder="Combined Years Teaching"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
-                    <div className="text-right">
+                    {/* SECTION 5: FOUNDERS HEADER */}
+                    <div className="bg-white/5 border border-white/5 p-6 rounded-2xl space-y-5">
+                      <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                        <h4 className="font-montserrat text-sm font-bold tracking-wider text-[#ffe6a6] uppercase">
+                          5. Cabeçalho da Seção de Fundadores & Mestres
+                        </h4>
+                        <span className="text-[10px] font-mono text-[#f6c86b] uppercase bg-[#f6c86b]/10 px-2 py-0.5 rounded">
+                          Founders Header
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                          <label className="text-xs font-montserrat font-bold uppercase tracking-wider text-[#ffe6a6]/80 block mb-1.5">
+                            Tag Superior dos Fundadores (Badge)
+                          </label>
+                          <input
+                            type="text"
+                            value={aboutData.foundersEyebrow || ""}
+                            onChange={(e) => setAboutData({ ...aboutData, foundersEyebrow: e.target.value })}
+                            className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[#f6c86b]/60 transition-all font-sans"
+                            placeholder="e.g. The Founders & Master Instructors"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-montserrat font-bold uppercase tracking-wider text-[#ffe6a6]/80 block mb-1.5">
+                            Título Principal dos Fundadores
+                          </label>
+                          <input
+                            type="text"
+                            value={aboutData.foundersTitle || ""}
+                            onChange={(e) => setAboutData({ ...aboutData, foundersTitle: e.target.value })}
+                            className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[#f6c86b]/60 transition-all font-sans"
+                            placeholder="e.g. Meet Xina & Laura"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="text-xs font-montserrat font-bold uppercase tracking-wider text-[#ffe6a6]/80 block mb-1.5">
+                            Subtítulo / Apresentação dos Fundadores
+                          </label>
+                          <textarea
+                            rows={2}
+                            value={aboutData.foundersSubtitle || ""}
+                            onChange={(e) => setAboutData({ ...aboutData, foundersSubtitle: e.target.value })}
+                            className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[#f6c86b]/60 transition-all font-sans leading-relaxed"
+                            placeholder="World-class dancer-educators bringing authentic Brazilian Zouk..."
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* SECTION 6: INSTRUCTORS & FOUNDERS LIST */}
+                    <div className="bg-white/5 border border-white/5 p-6 rounded-2xl space-y-5">
+                      <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                        <div>
+                          <h4 className="font-montserrat text-sm font-bold tracking-wider text-[#ffe6a6] uppercase">
+                            6. Lista de Fundadores e Instrutores
+                          </h4>
+                          <p className="text-[11px] text-[#fff6da]/60">
+                            Cards completos com foto, biografia, frase pessoal, especialidades e redes sociais.
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenFounderModal()}
+                          className="inline-flex items-center space-x-1.5 bg-[#9bb08a] hover:bg-[#ffe6a6] hover:text-[#3b3f3a] text-[#3b3f3a] px-3.5 py-2 rounded-xl text-xs font-montserrat font-bold uppercase tracking-wider transition-all cursor-pointer shadow-sm"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Adicionar Instrutor</span>
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {aboutData.founders?.map((member: any, idx: number) => {
+                          const quote = member.quote || "";
+                          let specs = member.specialties;
+                          if (Array.isArray(specs)) specs = specs.join(", ");
+                          
+                          return (
+                            <div key={member.id || idx} className="bg-black/20 border border-white/10 rounded-2xl p-4 flex gap-4 items-start hover:border-white/20 transition-all">
+                              <img
+                                src={member.image}
+                                alt={member.name}
+                                className="w-16 h-16 rounded-2xl object-cover border border-[#f6c86b]/40 flex-shrink-0"
+                              />
+                              <div className="space-y-1 flex-grow overflow-hidden">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs font-montserrat font-bold text-[#f6c86b] uppercase tracking-wider truncate">
+                                    {member.name}
+                                  </span>
+                                  <span className="text-[10px] text-white/50 font-mono">
+                                    {member.role ? member.role.split("&")[0] : ""}
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-[#fff6da]/70 line-clamp-2 leading-relaxed font-light">
+                                  {member.bio}
+                                </p>
+                                {quote && (
+                                  <p className="text-[10px] italic text-[#ffe6a6]/80 truncate">
+                                    "{quote}"
+                                  </p>
+                                )}
+                                {specs && (
+                                  <p className="text-[10px] text-white/50 truncate">
+                                    🎯 {specs}
+                                  </p>
+                                )}
+                                
+                                <div className="flex items-center space-x-3 pt-2 border-t border-white/5">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenFounderModal(member)}
+                                    className="inline-flex items-center space-x-1 text-[11px] font-bold text-[#ffe6a6] hover:text-[#f6c86b] transition-colors cursor-pointer"
+                                  >
+                                    <Edit className="w-3 h-3" />
+                                    <span>Editar</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteFounder(member.id)}
+                                    className="inline-flex items-center space-x-1 text-[11px] font-bold text-red-300 hover:text-red-400 transition-colors cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                    <span>Excluir</span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* SECTION 7: SIGNATURE QUOTE BANNER */}
+                    <div className="bg-white/5 border border-white/5 p-6 rounded-2xl space-y-5">
+                      <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                        <h4 className="font-montserrat text-sm font-bold tracking-wider text-[#ffe6a6] uppercase">
+                          7. Citação de Assinatura & Rodapé da Seção
+                        </h4>
+                        <span className="text-[10px] font-mono text-[#f6c86b] uppercase bg-[#f6c86b]/10 px-2 py-0.5 rounded">
+                          Banner de Assinatura
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div className="md:col-span-2">
+                          <label className="text-xs font-montserrat font-bold uppercase tracking-wider text-[#ffe6a6]/80 block mb-1.5">
+                            Frase Inspiradora de Fechamento (Signature Quote)
+                          </label>
+                          <textarea
+                            rows={2}
+                            value={aboutData.signatureQuote || ""}
+                            onChange={(e) => setAboutData({ ...aboutData, signatureQuote: e.target.value })}
+                            className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[#f6c86b]/60 transition-all font-sans leading-relaxed"
+                            placeholder="Dance isn't about perfect execution..."
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-montserrat font-bold uppercase tracking-wider text-[#ffe6a6]/80 block mb-1.5">
+                            Assinatura do Autor (Credit)
+                          </label>
+                          <input
+                            type="text"
+                            value={aboutData.signatureAuthor || ""}
+                            onChange={(e) => setAboutData({ ...aboutData, signatureAuthor: e.target.value })}
+                            className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[#f6c86b]/60 transition-all font-sans"
+                            placeholder="— Xina & Laura"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* BOTTOM SAVE BUTTON */}
+                    <div className="flex justify-end pt-4">
                       <button
                         type="submit"
-                        className="inline-flex items-center space-x-2 bg-[#f6c86b] hover:bg-[#ffe6a6] text-[#3b3f3a] font-montserrat text-[11px] font-bold tracking-widest uppercase px-6 py-3 rounded-xl transition-all duration-300 shadow-md cursor-pointer"
+                        className="inline-flex items-center space-x-2 bg-[#f6c86b] hover:bg-[#ffe6a6] text-[#3b3f3a] px-8 py-4 rounded-xl text-xs font-bold uppercase tracking-widest transition-all cursor-pointer shadow-lg shadow-[#f6c86b]/15"
                       >
                         <Save className="w-4 h-4" />
-                        <span>Save General Content</span>
+                        <span>Salvar Todo o Conteúdo da Página About Us</span>
                       </button>
                     </div>
                   </form>
-
-                  {/* INSTRUCTORS LIST */}
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-display text-lg font-bold uppercase text-[#ffe6a6]">
-                          School Founders & Instructors
-                        </h4>
-                        <p className="text-[11px] text-[#fff6da]/60">Manage the instructors displayed under meet our founders.</p>
-                      </div>
-                      <button
-                        onClick={() => handleOpenFounderModal()}
-                        className="inline-flex items-center space-x-1.5 bg-[#9bb08a] hover:bg-[#ffe6a6] hover:text-[#3b3f3a] text-[#3b3f3a] px-3.5 py-2 rounded-xl text-xs font-montserrat font-bold uppercase tracking-wider transition-all cursor-pointer"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Add Member</span>
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {aboutData.founders?.map((member: any, idx: number) => (
-                        <div key={member.id || idx} className="bg-black/20 border border-white/5 rounded-2xl p-4 flex gap-4 items-start hover:border-white/15 transition-all">
-                          <img
-                            src={member.image}
-                            alt={member.name}
-                            className="w-14 h-14 rounded-full object-cover border border-[#f6c86b]/40 flex-shrink-0"
-                          />
-                          <div className="space-y-1.5 flex-grow">
-                            <span className="text-xs font-montserrat font-bold text-[#f6c86b] uppercase block tracking-wider">{member.name}</span>
-                            <span className="text-[11px] font-medium text-white/80 block leading-tight">{member.role}</span>
-                            <p className="text-[11px] text-[#fff6da]/70 line-clamp-2 leading-relaxed font-light">{member.bio}</p>
-                            
-                            <div className="flex items-center space-x-2 pt-2 border-t border-white/5">
-                              <button
-                                onClick={() => handleOpenFounderModal(member)}
-                                className="inline-flex items-center space-x-1 text-[10px] font-bold text-[#ffe6a6] hover:text-[#f6c86b] transition-colors"
-                              >
-                                <Edit className="w-3 h-3" />
-                                <span>Edit</span>
-                              </button>
-                              <button
-                                onClick={() => handleDeleteFounder(member.id)}
-                                className="inline-flex items-center space-x-1 text-[10px] font-bold text-red-300 hover:text-red-400 transition-colors"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                                <span>Delete</span>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
                 </motion.div>
               )}
 
@@ -2370,49 +2788,129 @@ export default function AdminPanel() {
 
               {/* MODAL FORM: INSTRUCTOR/FOUNDER */}
               {modalType === "founder" && (
-                <form onSubmit={handleSaveFounder} className="p-6 space-y-4">
-                  <div>
-                    <label className="text-xs font-montserrat font-bold uppercase block mb-1">Name</label>
-                    <input
-                      type="text"
-                      required
-                      value={founderForm.name}
-                      onChange={(e) => setFounderForm({ ...founderForm, name: e.target.value })}
-                      className="w-full bg-black/20 border border-white/10 rounded-xl py-2.5 px-3.5 text-sm text-white focus:outline-none focus:border-[#f6c86b]"
-                    />
+                <form onSubmit={handleSaveFounder} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-montserrat font-bold uppercase block mb-1">Name / Nome do Instrutor</label>
+                      <input
+                        type="text"
+                        required
+                        value={founderForm.name}
+                        onChange={(e) => setFounderForm({ ...founderForm, name: e.target.value })}
+                        className="w-full bg-black/20 border border-white/10 rounded-xl py-2.5 px-3.5 text-sm text-white focus:outline-none focus:border-[#f6c86b]"
+                        placeholder="e.g. Xina ou Laura"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-montserrat font-bold uppercase block mb-1">Role / Cargo ou Título</label>
+                      <input
+                        type="text"
+                        required
+                        value={founderForm.role}
+                        onChange={(e) => setFounderForm({ ...founderForm, role: e.target.value })}
+                        className="w-full bg-black/20 border border-white/10 rounded-xl py-2.5 px-3.5 text-sm text-white focus:outline-none focus:border-[#f6c86b]"
+                        placeholder="e.g. Co-Founder & Lead Instructor"
+                      />
+                    </div>
                   </div>
+
                   <div>
-                    <label className="text-xs font-montserrat font-bold uppercase block mb-1">Role / Title</label>
-                    <input
-                      type="text"
-                      required
-                      value={founderForm.role}
-                      onChange={(e) => setFounderForm({ ...founderForm, role: e.target.value })}
-                      className="w-full bg-black/20 border border-white/10 rounded-xl py-2.5 px-3.5 text-sm text-white focus:outline-none focus:border-[#f6c86b]"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-montserrat font-bold uppercase block mb-1">Biography</label>
+                    <label className="text-xs font-montserrat font-bold uppercase block mb-1">Biography / Biografia</label>
                     <textarea
                       rows={3}
                       required
                       value={founderForm.bio}
                       onChange={(e) => setFounderForm({ ...founderForm, bio: e.target.value })}
                       className="w-full bg-black/20 border border-white/10 rounded-xl py-2.5 px-3.5 text-sm text-white focus:outline-none focus:border-[#f6c86b] leading-relaxed"
+                      placeholder="Histórico, formação e metodologia do instrutor..."
                     />
                   </div>
+
                   <div>
                     <MediaPicker
-                      label="Instructor Profile Photo"
+                      label="Instructor Profile Photo / Foto do Instrutor"
                       value={founderForm.image}
                       onChange={(url) => setFounderForm({ ...founderForm, image: url })}
                       idPrefix="founder-img"
                     />
                   </div>
+
+                  <div>
+                    <label className="text-xs font-montserrat font-bold uppercase block mb-1">Personal Quote / Frase Filosófica</label>
+                    <input
+                      type="text"
+                      value={founderForm.quote}
+                      onChange={(e) => setFounderForm({ ...founderForm, quote: e.target.value })}
+                      className="w-full bg-black/20 border border-white/10 rounded-xl py-2.5 px-3.5 text-sm text-white focus:outline-none focus:border-[#f6c86b]"
+                      placeholder="e.g. Dance is a physical dialogue of mutual trust, energy, and freedom."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-montserrat font-bold uppercase block mb-1">
+                      Specialties / Especialidades (separadas por vírgula)
+                    </label>
+                    <input
+                      type="text"
+                      value={founderForm.specialties}
+                      onChange={(e) => setFounderForm({ ...founderForm, specialties: e.target.value })}
+                      className="w-full bg-black/20 border border-white/10 rounded-xl py-2.5 px-3.5 text-sm text-white focus:outline-none focus:border-[#f6c86b]"
+                      placeholder="e.g. Brazilian Zouk, Classic Lambada, Biomechanics & Technique"
+                    />
+                  </div>
+
+                  {/* SOCIAL LINKS */}
+                  <div className="bg-black/20 border border-white/5 p-4 rounded-2xl space-y-3">
+                    <span className="text-[11px] font-montserrat font-bold text-[#ffe6a6] uppercase tracking-wider block">
+                      Social Media Links do Instrutor
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] uppercase font-bold text-white/70 block mb-1">Instagram URL</label>
+                        <input
+                          type="text"
+                          value={founderForm.instagram}
+                          onChange={(e) => setFounderForm({ ...founderForm, instagram: e.target.value })}
+                          className="w-full bg-black/30 border border-white/10 rounded-lg py-2 px-3 text-xs text-white focus:outline-none focus:border-[#f6c86b]"
+                          placeholder="https://instagram.com/..."
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] uppercase font-bold text-white/70 block mb-1">Facebook URL</label>
+                        <input
+                          type="text"
+                          value={founderForm.facebook}
+                          onChange={(e) => setFounderForm({ ...founderForm, facebook: e.target.value })}
+                          className="w-full bg-black/30 border border-white/10 rounded-lg py-2 px-3 text-xs text-white focus:outline-none focus:border-[#f6c86b]"
+                          placeholder="https://facebook.com/..."
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] uppercase font-bold text-white/70 block mb-1">YouTube URL</label>
+                        <input
+                          type="text"
+                          value={founderForm.youtube}
+                          onChange={(e) => setFounderForm({ ...founderForm, youtube: e.target.value })}
+                          className="w-full bg-black/30 border border-white/10 rounded-lg py-2 px-3 text-xs text-white focus:outline-none focus:border-[#f6c86b]"
+                          placeholder="https://youtube.com/@..."
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] uppercase font-bold text-white/70 block mb-1">WhatsApp Link</label>
+                        <input
+                          type="text"
+                          value={founderForm.whatsapp}
+                          onChange={(e) => setFounderForm({ ...founderForm, whatsapp: e.target.value })}
+                          className="w-full bg-black/30 border border-white/10 rounded-lg py-2 px-3 text-xs text-white focus:outline-none focus:border-[#f6c86b]"
+                          placeholder="https://wa.me/..."
+                        />
+                      </div>
+                    </div>
+                  </div>
                   
                   <div className="pt-4 border-t border-white/5 text-right space-x-3">
-                    <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-bold uppercase tracking-wider">Cancel</button>
-                    <button type="submit" className="px-6 py-2.5 bg-[#f6c86b] hover:bg-[#ffe6a6] text-[#3b3f3a] rounded-xl text-xs font-bold uppercase tracking-widest">Save Member</button>
+                    <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer">Cancel</button>
+                    <button type="submit" className="px-6 py-2.5 bg-[#f6c86b] hover:bg-[#ffe6a6] text-[#3b3f3a] rounded-xl text-xs font-bold uppercase tracking-widest cursor-pointer shadow-md">Save Member</button>
                   </div>
                 </form>
               )}

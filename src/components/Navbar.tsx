@@ -1,8 +1,149 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { motion, useMotionValue, useSpring } from "motion/react";
 import { Menu, X, MessageCircle } from "lucide-react";
 import { brandDetails } from "../data";
 // @ts-ignore
 import logoImage from "../assets/images/logo_2indance_1782381576138.jpg";
+
+interface MagneticNavItemProps {
+  key?: React.Key;
+  label: string;
+  id: string;
+  isActive: boolean;
+  onClick: () => void;
+}
+
+function MagneticNavItem({ label, id, isActive, onClick }: MagneticNavItemProps) {
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  // Soft tactile spring physics
+  const springConfig = { damping: 15, stiffness: 200, mass: 0.1 };
+  const springX = useSpring(x, springConfig);
+  const springY = useSpring(y, springConfig);
+
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (e.pointerType === "touch" || !buttonRef.current) return;
+
+    const rect = buttonRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const distanceX = e.clientX - centerX;
+    const distanceY = e.clientY - centerY;
+
+    // Elastic magnetic pull factor (capped for elegance)
+    const pullFactor = 0.36;
+    const maxPullX = 10;
+    const maxPullY = 8;
+
+    const clampedX = Math.max(Math.min(distanceX * pullFactor, maxPullX), -maxPullX);
+    const clampedY = Math.max(Math.min(distanceY * pullFactor, maxPullY), -maxPullY);
+
+    x.set(clampedX);
+    y.set(clampedY);
+  };
+
+  const handlePointerEnter = () => {
+    setIsHovered(true);
+  };
+
+  const handlePointerLeave = () => {
+    setIsHovered(false);
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.button
+      ref={buttonRef}
+      id={`nav-item-${id}`}
+      onClick={onClick}
+      onPointerMove={handlePointerMove}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
+      style={{ x: springX, y: springY }}
+      className={`relative px-3.5 py-1.5 rounded-xl font-montserrat text-xs font-semibold tracking-wider uppercase cursor-pointer select-none transition-colors duration-200 focus:outline-none will-change-transform ${
+        isActive ? "text-[#f6c86b]" : "text-[#fff6da]/90 hover:text-[#f6c86b]"
+      }`}
+    >
+      {/* Subtle magnetic ambient highlight backdrop */}
+      <span
+        aria-hidden="true"
+        className={`absolute inset-0 rounded-xl transition-all duration-300 pointer-events-none ${
+          isHovered
+            ? "bg-[#f6c86b]/12 shadow-[0_0_14px_rgba(246,200,107,0.18)] scale-105 opacity-100"
+            : "opacity-0 scale-95"
+        }`}
+      />
+
+      {/* Label text */}
+      <span className="relative z-10">{label}</span>
+
+      {/* Active Dot Indicator */}
+      {isActive && (
+        <motion.span
+          layoutId="activeNavDot"
+          className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#f6c86b] shadow-[0_0_8px_rgba(246,200,107,0.85)]"
+          transition={{ type: "spring", stiffness: 380, damping: 26 }}
+        />
+      )}
+    </motion.button>
+  );
+}
+
+function MagneticWrapper({
+  children,
+  className = "",
+  strength = 0.28,
+  maxDistance = 8
+}: {
+  children: React.ReactNode;
+  className?: string;
+  strength?: number;
+  maxDistance?: number;
+}) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const springConfig = { damping: 15, stiffness: 200, mass: 0.1 };
+  const springX = useSpring(x, springConfig);
+  const springY = useSpring(y, springConfig);
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "touch" || !ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const distanceX = e.clientX - centerX;
+    const distanceY = e.clientY - centerY;
+
+    x.set(Math.max(Math.min(distanceX * strength, maxDistance), -maxDistance));
+    y.set(Math.max(Math.min(distanceY * strength, maxDistance), -maxDistance));
+  };
+
+  const handlePointerLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+      style={{ x: springX, y: springY }}
+      className={`inline-block will-change-transform ${className}`}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -114,45 +255,42 @@ export default function Navbar() {
           </button>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            <div className="flex space-x-6">
+          <div className="hidden md:flex items-center space-x-6">
+            <div className="flex items-center space-x-1">
               {navItems.map((item) => (
-                <button
+                <MagneticNavItem
                   key={item.id}
+                  id={item.id}
+                  label={item.label}
+                  isActive={currentPage === item.id}
                   onClick={() => handleNavigate(item.id)}
-                  className={`font-montserrat text-xs font-semibold tracking-wider transition-colors duration-200 uppercase cursor-pointer relative ${
-                    currentPage === item.id 
-                      ? "text-[#f6c86b]" 
-                      : "text-[#fff6da]/90 hover:text-[#f6c86b]"
-                  }`}
-                >
-                  {item.label}
-                  {currentPage === item.id && (
-                    <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#f6c86b]" />
-                  )}
-                </button>
+                />
               ))}
             </div>
 
-            {/* CTA Buttons */}
+            {/* CTA Buttons with Magnetic Hover Feel */}
             <div className="flex items-center space-x-4 border-l border-[#9bb08a]/20 pl-6">
               {/* WhatsApp Quick Chat */}
-              <a
-                href={`https://wa.me/447984564350`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#fff6da]/80 hover:text-[#f6c86b] transition-colors duration-200"
-                title="Chat with us"
-              >
-                <MessageCircle className="w-5 h-5 text-[#9bb08a] hover:text-[#f6c86b] transition-colors" />
-              </a>
+              <MagneticWrapper strength={0.35} maxDistance={6}>
+                <a
+                  href={`https://wa.me/447984564350`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center p-2 rounded-xl text-[#fff6da]/80 hover:text-[#f6c86b] hover:bg-[#f6c86b]/10 transition-colors duration-200"
+                  title="Chat with us"
+                >
+                  <MessageCircle className="w-5 h-5 text-[#9bb08a] hover:text-[#f6c86b] transition-colors" />
+                </a>
+              </MagneticWrapper>
 
-              <button
-                onClick={() => handleNavigate("contact")}
-                className="px-5 py-2.5 rounded-xl bg-[#f6c86b] text-[#3b3f3a] font-montserrat text-[11px] font-bold tracking-widest uppercase hover:bg-[#ffe6a6] transition-all duration-300 shadow-md shadow-[#f6c86b]/10 cursor-pointer"
-              >
-                Book Now
-              </button>
+              <MagneticWrapper strength={0.3} maxDistance={8}>
+                <button
+                  onClick={() => handleNavigate("contact")}
+                  className="px-5 py-2.5 rounded-xl bg-[#f6c86b] text-[#3b3f3a] font-montserrat text-[11px] font-bold tracking-widest uppercase hover:bg-[#ffe6a6] transition-all duration-300 shadow-md shadow-[#f6c86b]/10 cursor-pointer"
+                >
+                  Book Now
+                </button>
+              </MagneticWrapper>
             </div>
           </div>
 

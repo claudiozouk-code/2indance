@@ -146,6 +146,7 @@ let localFrontpage = {
   hero_cta_secondary: "Explore Classes",
   hainan_badge: "Featured Global Event • March 2027",
   hainan_title: "Hainan Island Zouk Marathon",
+  hainan_title_theme: "tropical",
   hainan_quote: "Hainan Island — China's tropical paradise. White-sand beaches, green mountains, fresh seafood, and vibrant reefs set the stage for endless adventures, unforgettable nights of dance, and the taste of local flavors.",
   hainan_link: "https://hainanzouk.2indance.com",
   social_instagram: "https://instagram.com/2indance",
@@ -343,6 +344,7 @@ async function initializeDatabase(conn: any) {
       { name: "hainan_resort_image", definition: "VARCHAR(1000) NOT NULL DEFAULT ''" },
       { name: "hainan_room_image", definition: "VARCHAR(1000) NOT NULL DEFAULT ''" },
       { name: "hainan_beach_image", definition: "VARCHAR(1000) NOT NULL DEFAULT ''" },
+      { name: "hainan_title_theme", definition: "VARCHAR(50) NOT NULL DEFAULT 'tropical'" },
       { name: "sections_order", definition: "TEXT NULL" }
     ];
 
@@ -358,6 +360,56 @@ async function initializeDatabase(conn: any) {
         }
       } catch (colErr: any) {
         console.error(`Error verifying/adding column ${col.name}:`, colErr.message);
+      }
+    }
+
+    // Check and add new columns for site_about_content
+    const newAboutColumns = [
+      { name: "headerTitle", definition: "VARCHAR(255) NOT NULL DEFAULT 'Meet Our School'" },
+      { name: "philosophyTag", definition: "VARCHAR(255) NOT NULL DEFAULT 'Our Philosophy'" },
+      { name: "pillar1Title", definition: "VARCHAR(255) NOT NULL DEFAULT 'Active Connection'" },
+      { name: "pillar1Text", definition: "TEXT NULL" },
+      { name: "pillar2Title", definition: "VARCHAR(255) NOT NULL DEFAULT 'Healthy Biomechanics'" },
+      { name: "pillar2Text", definition: "TEXT NULL" },
+      { name: "stats_json", definition: "TEXT NULL" },
+      { name: "foundersEyebrow", definition: "VARCHAR(255) NOT NULL DEFAULT 'The Founders & Master Instructors'" },
+      { name: "foundersTitle", definition: "VARCHAR(255) NOT NULL DEFAULT 'Meet Xina & Laura'" },
+      { name: "foundersSubtitle", definition: "TEXT NULL" },
+      { name: "signatureQuote", definition: "TEXT NULL" },
+      { name: "signatureAuthor", definition: "VARCHAR(255) NOT NULL DEFAULT '— Xina & Laura'" }
+    ];
+
+    for (const col of newAboutColumns) {
+      try {
+        const [existingCols] = await conn.query(`SHOW COLUMNS FROM site_about_content LIKE ?`, [col.name]) as any[];
+        if (existingCols.length === 0) {
+          console.log(`Adding column ${col.name} to site_about_content...`);
+          await conn.query(`ALTER TABLE site_about_content ADD COLUMN ${col.name} ${col.definition}`);
+        }
+      } catch (err: any) {
+        console.error(`Error adding column ${col.name} to site_about_content:`, err.message);
+      }
+    }
+
+    // Check and add new columns for site_founders
+    const newFounderColumns = [
+      { name: "quote", definition: "TEXT NULL" },
+      { name: "specialties", definition: "TEXT NULL" },
+      { name: "instagram", definition: "VARCHAR(255) NOT NULL DEFAULT ''" },
+      { name: "facebook", definition: "VARCHAR(255) NOT NULL DEFAULT ''" },
+      { name: "youtube", definition: "VARCHAR(255) NOT NULL DEFAULT ''" },
+      { name: "whatsapp", definition: "VARCHAR(255) NOT NULL DEFAULT ''" }
+    ];
+
+    for (const col of newFounderColumns) {
+      try {
+        const [existingCols] = await conn.query(`SHOW COLUMNS FROM site_founders LIKE ?`, [col.name]) as any[];
+        if (existingCols.length === 0) {
+          console.log(`Adding column ${col.name} to site_founders...`);
+          await conn.query(`ALTER TABLE site_founders ADD COLUMN ${col.name} ${col.definition}`);
+        }
+      } catch (err: any) {
+        console.error(`Error adding column ${col.name} to site_founders:`, err.message);
       }
     }
 
@@ -660,7 +712,7 @@ app.post("/api/frontpage", async (req, res) => {
     social_instagram, social_facebook, social_youtube, social_whatsapp,
     footer_text, footer_disclaimer, logo_url, favicon_url,
     seo_title, seo_meta_description, seo_keywords, seo_og_image, seo_robots, google_site_verification, seo_custom_tags,
-    hero_bg_type, hero_bg_image, hainan_logo_image, hainan_resort_image, hainan_room_image, hainan_beach_image, sections_order
+    hero_bg_type, hero_bg_image, hainan_logo_image, hainan_resort_image, hainan_room_image, hainan_beach_image, hainan_title_theme, sections_order
   } = req.body;
 
   localFrontpage = {
@@ -678,6 +730,7 @@ app.post("/api/frontpage", async (req, res) => {
     hero_cta_secondary: hero_cta_secondary !== undefined ? hero_cta_secondary : localFrontpage.hero_cta_secondary,
     hainan_badge: hainan_badge !== undefined ? hainan_badge : localFrontpage.hainan_badge,
     hainan_title: hainan_title !== undefined ? hainan_title : localFrontpage.hainan_title,
+    hainan_title_theme: hainan_title_theme !== undefined ? hainan_title_theme : (localFrontpage.hainan_title_theme || "tropical"),
     hainan_quote: hainan_quote !== undefined ? hainan_quote : localFrontpage.hainan_quote,
     hainan_link: hainan_link !== undefined ? hainan_link : localFrontpage.hainan_link,
     social_instagram: social_instagram !== undefined ? social_instagram : localFrontpage.social_instagram,
@@ -715,7 +768,7 @@ app.post("/api/frontpage", async (req, res) => {
             social_instagram = ?, social_facebook = ?, social_youtube = ?, social_whatsapp = ?,
             footer_text = ?, footer_disclaimer = ?, logo_url = ?, favicon_url = ?,
             seo_title = ?, seo_meta_description = ?, seo_keywords = ?, seo_og_image = ?, seo_robots = ?, google_site_verification = ?, seo_custom_tags = ?,
-            hero_bg_type = ?, hero_bg_image = ?, hainan_logo_image = ?, hainan_resort_image = ?, hainan_room_image = ?, hainan_beach_image = ?, sections_order = ?
+            hero_bg_type = ?, hero_bg_image = ?, hainan_logo_image = ?, hainan_resort_image = ?, hainan_room_image = ?, hainan_beach_image = ?, hainan_title_theme = ?, sections_order = ?
         WHERE id = 1
       `, [
         localFrontpage.brand_name, localFrontpage.brand_tagline, localFrontpage.brand_description, localFrontpage.brand_phone, localFrontpage.brand_email, localFrontpage.brand_locations,
@@ -724,7 +777,7 @@ app.post("/api/frontpage", async (req, res) => {
         localFrontpage.social_instagram, localFrontpage.social_facebook, localFrontpage.social_youtube, localFrontpage.social_whatsapp,
         localFrontpage.footer_text, localFrontpage.footer_disclaimer, localFrontpage.logo_url, localFrontpage.favicon_url,
         localFrontpage.seo_title, localFrontpage.seo_meta_description, localFrontpage.seo_keywords, localFrontpage.seo_og_image, localFrontpage.seo_robots, localFrontpage.google_site_verification, localFrontpage.seo_custom_tags,
-        localFrontpage.hero_bg_type, localFrontpage.hero_bg_image, localFrontpage.hainan_logo_image, localFrontpage.hainan_resort_image, localFrontpage.hainan_room_image, localFrontpage.hainan_beach_image, localFrontpage.sections_order
+        localFrontpage.hero_bg_type, localFrontpage.hero_bg_image, localFrontpage.hainan_logo_image, localFrontpage.hainan_resort_image, localFrontpage.hainan_room_image, localFrontpage.hainan_beach_image, localFrontpage.hainan_title_theme, localFrontpage.sections_order
       ]);
     }
     res.json({ success: true, message: "Frontpage settings updated successfully!" });
@@ -751,15 +804,56 @@ app.get("/api/about", async (req, res) => {
       return;
     }
 
+    let stats = localAbout.stats;
+    if (aboutData.stats_json) {
+      try {
+        const parsed = JSON.parse(aboutData.stats_json);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          stats = parsed;
+        }
+      } catch (_) {}
+    }
+
+    const formattedFounders = (founders as any[]).map(f => {
+      let specs = f.specialties;
+      if (typeof specs === "string" && specs.startsWith("[")) {
+        try { specs = JSON.parse(specs); } catch (_) {}
+      } else if (typeof specs === "string" && specs) {
+        specs = specs.split(",").map((s: string) => s.trim()).filter(Boolean);
+      }
+      return {
+        ...f,
+        specialties: specs || undefined,
+        quote: f.quote || "",
+        socials: {
+          instagram: f.instagram || "https://instagram.com/2indance",
+          facebook: f.facebook || "https://facebook.com/2indance",
+          youtube: f.youtube || "https://youtube.com/@2indance",
+          whatsapp: f.whatsapp || "https://wa.me/85291234567"
+        }
+      };
+    });
+
     res.json({
       success: true,
-      title: aboutData.title,
-      subtitle: aboutData.subtitle,
-      storyTitle: aboutData.storyTitle,
-      storyText1: aboutData.storyText1,
-      storyText2: aboutData.storyText2,
-      founders: founders,
-      stats: localAbout.stats // Keep default stats array or return it
+      title: aboutData.title || localAbout.title,
+      headerTitle: aboutData.headerTitle || (localAbout as any).headerTitle,
+      subtitle: aboutData.subtitle || localAbout.subtitle,
+      philosophyTag: aboutData.philosophyTag || (localAbout as any).philosophyTag,
+      storyTitle: aboutData.storyTitle || localAbout.storyTitle,
+      storyText1: aboutData.storyText1 || localAbout.storyText1,
+      storyText2: aboutData.storyText2 !== undefined ? aboutData.storyText2 : localAbout.storyText2,
+      pillar1Title: aboutData.pillar1Title || (localAbout as any).pillar1Title,
+      pillar1Text: aboutData.pillar1Text || (localAbout as any).pillar1Text,
+      pillar2Title: aboutData.pillar2Title || (localAbout as any).pillar2Title,
+      pillar2Text: aboutData.pillar2Text || (localAbout as any).pillar2Text,
+      foundersEyebrow: aboutData.foundersEyebrow || (localAbout as any).foundersEyebrow,
+      foundersTitle: aboutData.foundersTitle || (localAbout as any).foundersTitle,
+      foundersSubtitle: aboutData.foundersSubtitle || (localAbout as any).foundersSubtitle,
+      signatureQuote: aboutData.signatureQuote || (localAbout as any).signatureQuote,
+      signatureAuthor: aboutData.signatureAuthor || (localAbout as any).signatureAuthor,
+      founders: formattedFounders.length > 0 ? formattedFounders : localAbout.founders,
+      stats: stats
     });
   } catch (err: any) {
     res.json({ success: true, isFallback: true, ...localAbout });
@@ -767,26 +861,53 @@ app.get("/api/about", async (req, res) => {
 });
 
 app.post("/api/about", async (req, res) => {
-  const { title, subtitle, storyTitle, storyText1, storyText2 } = req.body;
-  
+  const {
+    title, headerTitle, subtitle, philosophyTag, storyTitle, storyText1, storyText2,
+    pillar1Title, pillar1Text, pillar2Title, pillar2Text,
+    foundersEyebrow, foundersTitle, foundersSubtitle,
+    signatureQuote, signatureAuthor, stats
+  } = req.body;
+
+  const statsJson = stats ? (typeof stats === "string" ? stats : JSON.stringify(stats)) : JSON.stringify(localAbout.stats || []);
+
   // Update local memory always
   localAbout = {
     ...localAbout,
-    title: title || localAbout.title,
-    subtitle: subtitle || localAbout.subtitle,
-    storyTitle: storyTitle || localAbout.storyTitle,
-    storyText1: storyText1 || localAbout.storyText1,
-    storyText2: storyText2 || localAbout.storyText2,
-  };
+    title: title !== undefined ? title : localAbout.title,
+    headerTitle: headerTitle !== undefined ? headerTitle : (localAbout as any).headerTitle,
+    subtitle: subtitle !== undefined ? subtitle : localAbout.subtitle,
+    philosophyTag: philosophyTag !== undefined ? philosophyTag : (localAbout as any).philosophyTag,
+    storyTitle: storyTitle !== undefined ? storyTitle : localAbout.storyTitle,
+    storyText1: storyText1 !== undefined ? storyText1 : localAbout.storyText1,
+    storyText2: storyText2 !== undefined ? storyText2 : localAbout.storyText2,
+    pillar1Title: pillar1Title !== undefined ? pillar1Title : (localAbout as any).pillar1Title,
+    pillar1Text: pillar1Text !== undefined ? pillar1Text : (localAbout as any).pillar1Text,
+    pillar2Title: pillar2Title !== undefined ? pillar2Title : (localAbout as any).pillar2Title,
+    pillar2Text: pillar2Text !== undefined ? pillar2Text : (localAbout as any).pillar2Text,
+    foundersEyebrow: foundersEyebrow !== undefined ? foundersEyebrow : (localAbout as any).foundersEyebrow,
+    foundersTitle: foundersTitle !== undefined ? foundersTitle : (localAbout as any).foundersTitle,
+    foundersSubtitle: foundersSubtitle !== undefined ? foundersSubtitle : (localAbout as any).foundersSubtitle,
+    signatureQuote: signatureQuote !== undefined ? signatureQuote : (localAbout as any).signatureQuote,
+    signatureAuthor: signatureAuthor !== undefined ? signatureAuthor : (localAbout as any).signatureAuthor,
+    stats: stats && Array.isArray(stats) ? stats : localAbout.stats
+  } as any;
 
   try {
     const dbPool = await getDbPool();
     if (dbPool) {
       await dbPool.query(`
         UPDATE site_about_content 
-        SET title = ?, subtitle = ?, storyTitle = ?, storyText1 = ?, storyText2 = ?
+        SET title = ?, headerTitle = ?, subtitle = ?, philosophyTag = ?, storyTitle = ?, storyText1 = ?, storyText2 = ?,
+            pillar1Title = ?, pillar1Text = ?, pillar2Title = ?, pillar2Text = ?,
+            foundersEyebrow = ?, foundersTitle = ?, foundersSubtitle = ?,
+            signatureQuote = ?, signatureAuthor = ?, stats_json = ?
         WHERE id = 1
-      `, [title, subtitle, storyTitle, storyText1, storyText2]);
+      `, [
+        localAbout.title, (localAbout as any).headerTitle, localAbout.subtitle, (localAbout as any).philosophyTag, localAbout.storyTitle, localAbout.storyText1, localAbout.storyText2,
+        (localAbout as any).pillar1Title, (localAbout as any).pillar1Text, (localAbout as any).pillar2Title, (localAbout as any).pillar2Text,
+        (localAbout as any).foundersEyebrow, (localAbout as any).foundersTitle, (localAbout as any).foundersSubtitle,
+        (localAbout as any).signatureQuote, (localAbout as any).signatureAuthor, statsJson
+      ]);
     }
     res.json({ success: true, message: "About content updated successfully!" });
   } catch (err: any) {
@@ -796,16 +917,18 @@ app.post("/api/about", async (req, res) => {
 
 // Founders CRUD
 app.post("/api/founders", async (req, res) => {
-  const { name, role, bio, image } = req.body;
+  const { name, role, bio, image, quote, specialties, instagram, facebook, youtube, whatsapp } = req.body;
+  const specStr = Array.isArray(specialties) ? JSON.stringify(specialties) : (specialties || "");
   try {
     const dbPool = await getDbPool();
     if (dbPool) {
       const [result] = await dbPool.query(`
-        INSERT INTO site_founders (name, role, bio, image) VALUES (?, ?, ?, ?)
-      `, [name, role, bio, image]);
+        INSERT INTO site_founders (name, role, bio, image, quote, specialties, instagram, facebook, youtube, whatsapp) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [name, role, bio, image, quote || "", specStr, instagram || "", facebook || "", youtube || "", whatsapp || ""]);
       res.json({ success: true, id: (result as any).insertId });
     } else {
-      const newItem = { id: String(Date.now()), name, role, bio, image };
+      const newItem = { id: String(Date.now()), name, role, bio, image, quote, specialties, instagram, facebook, youtube, whatsapp };
       localAbout.founders.push(newItem as any);
       res.json({ success: true, id: newItem.id });
     }
@@ -816,16 +939,19 @@ app.post("/api/founders", async (req, res) => {
 
 app.put("/api/founders/:id", async (req, res) => {
   const { id } = req.params;
-  const { name, role, bio, image } = req.body;
+  const { name, role, bio, image, quote, specialties, instagram, facebook, youtube, whatsapp } = req.body;
+  const specStr = Array.isArray(specialties) ? JSON.stringify(specialties) : (specialties || "");
   try {
     const dbPool = await getDbPool();
     if (dbPool) {
       await dbPool.query(`
-        UPDATE site_founders SET name = ?, role = ?, bio = ?, image = ? WHERE id = ?
-      `, [name, role, bio, image, id]);
+        UPDATE site_founders 
+        SET name = ?, role = ?, bio = ?, image = ?, quote = ?, specialties = ?, instagram = ?, facebook = ?, youtube = ?, whatsapp = ? 
+        WHERE id = ?
+      `, [name, role, bio, image, quote || "", specStr, instagram || "", facebook || "", youtube || "", whatsapp || "", id]);
       res.json({ success: true });
     } else {
-      localAbout.founders = localAbout.founders.map(f => f.name === name ? { ...f, name, role, bio, image } : f);
+      localAbout.founders = localAbout.founders.map(f => String(f.id) === String(id) ? { ...f, name, role, bio, image, quote, specialties, instagram, facebook, youtube, whatsapp } as any : f);
       res.json({ success: true });
     }
   } catch (err: any) {
