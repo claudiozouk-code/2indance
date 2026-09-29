@@ -124,7 +124,7 @@ export default function Contact({ selectedClass = "" }: ContactProps) {
                   href={`https://wa.me/447984564350`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center space-x-4 p-4 bg-[#ffe6a6]/25 hover:bg-[#ffe6a6]/45 border border-[#9bb08a]/20 hover:border-[#f6c86b] rounded-2xl transition-all duration-300 group"
+                  className="flex items-center space-x-4 p-4 bg-[#ffe6a6]/30 hover:bg-[#ffe6a6]/50 border border-[#f6c86b]/30 hover:border-[#f6c86b] shadow-[0_0_12px_rgba(246,200,107,0.12)] hover:shadow-[0_0_22px_rgba(246,200,107,0.35)] rounded-2xl transition-all duration-300 group"
                 >
                   <div className="p-3 bg-[#9bb08a]/10 border border-[#9bb08a]/20 rounded-xl text-[#3b3f3a] group-hover:bg-[#9bb08a]/20 transition-all">
                     <MessageCircle className="w-5 h-5 stroke-[2.5px]" />
@@ -138,7 +138,7 @@ export default function Contact({ selectedClass = "" }: ContactProps) {
                 {/* Direct Email */}
                 <a
                   href={`mailto:${frontpage.brand_email}`}
-                  className="flex items-center space-x-4 p-4 bg-[#ffe6a6]/25 hover:bg-[#ffe6a6]/45 border border-[#9bb08a]/20 hover:border-[#f6c86b] rounded-2xl transition-all duration-300 group"
+                  className="flex items-center space-x-4 p-4 bg-[#ffe6a6]/30 hover:bg-[#ffe6a6]/50 border border-[#f6c86b]/30 hover:border-[#f6c86b] shadow-[0_0_12px_rgba(246,200,107,0.12)] hover:shadow-[0_0_22px_rgba(246,200,107,0.35)] rounded-2xl transition-all duration-300 group"
                 >
                   <div className="p-3 bg-[#9bb08a]/10 border border-[#9bb08a]/20 rounded-xl text-[#3b3f3a] group-hover:bg-[#9bb08a]/20 transition-all">
                     <Mail className="w-5 h-5" />
@@ -150,7 +150,7 @@ export default function Contact({ selectedClass = "" }: ContactProps) {
                 </a>
 
                 {/* Locations */}
-                <div className="flex items-center space-x-4 p-4 bg-[#ffe6a6]/15 border border-[#9bb08a]/10 rounded-2xl">
+                <div className="flex items-center space-x-4 p-4 bg-[#ffe6a6]/20 border border-[#f6c86b]/20 shadow-[0_0_10px_rgba(246,200,107,0.1)] rounded-2xl">
                   <div className="p-3 bg-[#9bb08a]/5 border border-[#9bb08a]/10 rounded-xl text-[#3b3f3a]">
                     <MapPin className="w-5 h-5" />
                   </div>
@@ -209,7 +209,7 @@ export default function Contact({ selectedClass = "" }: ContactProps) {
 
           {/* Right Column: High Fidelity Booking & Contact Form */}
           <div className="lg:col-span-7">
-            <div className="bg-[#3b3f3a] border border-[#9bb08a]/20 p-6 md:p-8 rounded-3xl shadow-xl relative text-[#fff6da]">
+            <div className="bg-[#3b3f3a] border border-[#f6c86b]/35 p-6 md:p-8 rounded-3xl shadow-xl neon-card-hover relative text-[#fff6da]">
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#f6c86b]/5 rounded-full blur-2xl pointer-events-none" />
 
               <h3 className="font-display text-2xl font-bold mb-2 text-[#fff6da] uppercase">

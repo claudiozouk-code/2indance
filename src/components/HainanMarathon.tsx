@@ -90,7 +90,7 @@ export default function HainanMarathon() {
               {frontpage.hainan_badge || "Featured Global Event • March 2027"}
             </span>
           </div>
-          <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-4 bg-gradient-to-r from-[#fff6da] via-[#ffe6a6] to-[#f6c86b] bg-clip-text text-transparent uppercase">
+          <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-4 bg-gradient-to-r from-[#fff6da] via-[#ffe6a6] to-[#f6c86b] bg-clip-text text-transparent uppercase title-emboss">
             {frontpage.hainan_title || "Hainan Island Zouk Marathon"}
           </h2>
           <div className="h-1 w-24 bg-gradient-to-r from-transparent via-[#f6c86b] to-transparent mx-auto mb-5" />
@@ -104,7 +104,7 @@ export default function HainanMarathon() {
           
           {/* LEFT PANEL: MAIN FLYER LOGO & QUICK HIGHLIGHTS (4 COLS) */}
           <div className="lg:col-span-4 flex flex-col justify-between space-y-6">
-            <div className="bg-[#1c2e24]/75 border border-[#9bb08a]/20 p-6 rounded-3xl backdrop-blur-md flex-grow flex flex-col items-center justify-center text-center shadow-xl group hover:border-[#f6c86b]/30 transition-all duration-300">
+            <div className="bg-[#1c2e24]/85 border border-[#f6c86b]/30 shadow-xl neon-card-hover p-6 rounded-3xl backdrop-blur-md flex-grow flex flex-col items-center justify-center text-center group">
               <div className="relative w-full max-w-[280px] mx-auto mb-6">
                 {/* Image Glow */}
                 <div className="absolute inset-0 bg-[#f6c86b]/10 rounded-2xl blur-xl opacity-60 group-hover:opacity-85 transition-opacity duration-300" />
@@ -133,7 +133,7 @@ export default function HainanMarathon() {
             </div>
 
             {/* ORGANIZERS & CONTACT CARD */}
-            <div className="bg-gradient-to-br from-[#1c2e24]/90 to-[#2b2f2d] border border-[#9bb08a]/20 p-6 rounded-3xl backdrop-blur-md shadow-xl">
+            <div className="bg-gradient-to-br from-[#1c2e24] to-[#2b2f2d] border border-[#f6c86b]/30 shadow-xl neon-card-hover p-6 rounded-3xl backdrop-blur-md">
               <h4 className="font-montserrat text-xs font-bold uppercase tracking-wider text-[#ffe6a6] mb-4 flex items-center space-x-2">
                 <span className="w-2 h-2 rounded-full bg-[#f6c86b] animate-ping" />
                 <span>Contact Organizers</span>
@@ -186,7 +186,7 @@ export default function HainanMarathon() {
           <div className="lg:col-span-8 flex flex-col justify-between space-y-8">
             
             {/* MARATHON KEY DETAILS & FULL PASS SECTION */}
-            <div className="bg-gradient-to-r from-[#1c2e24]/80 to-[#2b2f2d]/85 border border-[#9bb08a]/20 p-6 md:p-8 rounded-3xl backdrop-blur-md shadow-xl space-y-6">
+            <div className="bg-gradient-to-r from-[#1c2e24] to-[#2b2f2d] border border-[#f6c86b]/30 shadow-xl neon-card-hover p-6 md:p-8 rounded-3xl backdrop-blur-md space-y-6">
               
               <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 border-b border-white/10 pb-5">
                 <div>
@@ -263,7 +263,7 @@ export default function HainanMarathon() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
               {/* ACCOMMODATION OFFER CARD */}
-              <div className="bg-[#1c2e24]/85 border border-[#9bb08a]/25 p-5 md:p-6 rounded-3xl backdrop-blur-md shadow-xl flex flex-col justify-between space-y-4">
+              <div className="bg-[#1c2e24]/90 border border-[#f6c86b]/30 shadow-xl neon-card-hover p-5 md:p-6 rounded-3xl backdrop-blur-md flex flex-col justify-between space-y-4">
                 <div className="space-y-3">
                   <div className="inline-flex items-center space-x-1.5 bg-[#9bb08a]/25 px-2.5 py-1 rounded-md text-[10px] font-montserrat font-bold uppercase text-[#ffe6a6] tracking-wider">
                     <Coffee className="w-3.5 h-3.5 text-[#f6c86b]" />
@@ -313,7 +313,7 @@ export default function HainanMarathon() {
               </div>
 
               {/* PRE-PARTY (EXTRA PARTIES) CARD */}
-              <div className="bg-[#1c2e24]/85 border border-[#9bb08a]/25 p-5 md:p-6 rounded-3xl backdrop-blur-md shadow-xl flex flex-col justify-between space-y-4">
+              <div className="bg-[#1c2e24]/90 border border-[#f6c86b]/30 shadow-xl neon-card-hover p-5 md:p-6 rounded-3xl backdrop-blur-md flex flex-col justify-between space-y-4">
                 <div className="space-y-3">
                   <div className="inline-flex items-center space-x-1.5 bg-[#f6c86b]/10 px-2.5 py-1 rounded-md text-[10px] font-montserrat font-bold uppercase text-[#f6c86b] tracking-wider">
                     <PartyPopper className="w-3.5 h-3.5" />

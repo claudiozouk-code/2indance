@@ -21,75 +21,53 @@ interface ScrollSectionProps {
   className?: string;
 }
 
-function ScrollSection({ children, zIndex = 1, effect, className = "" }: ScrollSectionProps) {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [stickyTop, setStickyTop] = useState<number>(0);
-
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-
-    const updateStickyTop = () => {
-      const rect = el.getBoundingClientRect();
-      const sectionHeight = el.offsetHeight || rect.height;
-      const viewportHeight = window.innerHeight;
-
-      if (sectionHeight > viewportHeight) {
-        // Stick when the bottom of this section reaches the bottom of the viewport,
-        // allowing the user to read/scroll through the entire section before the next card covers it.
-        setStickyTop(viewportHeight - sectionHeight);
-      } else {
-        setStickyTop(0);
-      }
-    };
-
-    updateStickyTop();
-
-    const resizeObserver = new ResizeObserver(() => {
-      updateStickyTop();
-    });
-
-    window.addEventListener("resize", updateStickyTop);
-
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", updateStickyTop);
-    };
-  }, []);
-
+function ScrollSection({ children, className = "" }: ScrollSectionProps) {
   return (
-    <div 
-      ref={sectionRef}
-      style={{ 
-        position: "sticky",
-        top: `${stickyTop}px`,
-        zIndex 
-      }}
-      className={`w-full min-h-screen bg-[#3b3f3a] transform-gpu transition-shadow duration-300 ${
-        effect === "hero" 
-          ? "" 
-          : "rounded-t-[2.5rem] md:rounded-t-[3.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.65)] border-t border-white/10"
-      } ${className}`}
-    >
-      {children}
+    <div className={`w-full bg-[#3b3f3a] ${className}`}>
+      <div className="w-full h-full">
+        {children}
+      </div>
     </div>
   );
 }
 
 const DEFAULT_SECTIONS = [
   { id: "hero", name: "Hero Section", visible: true, zIndex: 10, effect: "hero" },
-  { id: "classes-events", name: "Weekly Classes & Events", visible: true, zIndex: 15, effect: "slide-left" },
-  { id: "hainan", name: "Hainan Zouk Marathon", visible: true, zIndex: 20, effect: "zoom-in" },
-  { id: "media", name: "Media & Gallery", visible: true, zIndex: 25, effect: "zoom-out" },
-  { id: "about", name: "About Us", visible: true, zIndex: 30, effect: "zoom-in" },
-  { id: "news", name: "News & Articles", visible: true, zIndex: 40, effect: "slide-right" },
-  { id: "contact", name: "Contact & Booking", visible: true, zIndex: 48, effect: "3d-rise" }
+  { id: "classes-events", name: "Weekly Classes & Events", visible: true, zIndex: 20, effect: "slide-left" },
+  { id: "hainan", name: "Hainan Zouk Marathon", visible: true, zIndex: 30, effect: "zoom-in" },
+  { id: "media", name: "Media & Gallery", visible: true, zIndex: 40, effect: "zoom-out" },
+  { id: "about", name: "About Us", visible: true, zIndex: 50, effect: "zoom-in" },
+  { id: "news", name: "News & Articles", visible: true, zIndex: 60, effect: "slide-right" },
+  { id: "contact", name: "Contact & Booking", visible: true, zIndex: 70, effect: "3d-rise" }
 ];
 
 export default function App() {
   const [selectedClass, setSelectedClass] = useState("");
   const [currentPage, setCurrentPage] = useState("home");
   const [sectionsLayout, setSectionsLayout] = useState<any[]>(DEFAULT_SECTIONS);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScrollProgress = () => {
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (totalHeight > 0) {
+        const currentScroll = window.scrollY;
+        const progress = Math.min(Math.max((currentScroll / totalHeight) * 100, 0), 100);
+        setScrollProgress(progress);
+      } else {
+        setScrollProgress(0);
+      }
+    };
+
+    window.addEventListener("scroll", handleScrollProgress, { passive: true });
+    window.addEventListener("resize", handleScrollProgress);
+    handleScrollProgress();
+
+    return () => {
+      window.removeEventListener("scroll", handleScrollProgress);
+      window.removeEventListener("resize", handleScrollProgress);
+    };
+  }, []);
 
   const handleSelectClass = (className: string) => {
     setSelectedClass(className);
@@ -327,6 +305,18 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#3b3f3a] text-[#fff6da] font-sans selection:bg-[#f6c86b]/40 selection:text-[#fff6da]">
+      {/* Top Viewport Scroll Progress Bar */}
+      <div 
+        id="scroll-progress-bar-container"
+        className="fixed top-0 left-0 right-0 z-[1000] h-1 bg-black/20 backdrop-blur-sm pointer-events-none"
+      >
+        <div 
+          id="scroll-progress-bar-fill"
+          className="h-full bg-gradient-to-r from-[#f6c86b] via-[#e5a045] to-[#f6c86b] transition-all duration-150 ease-out shadow-[0_0_10px_rgba(246,200,107,0.8)]"
+          style={{ width: `${scrollProgress}%` }}
+        />
+      </div>
+
       {/* Top Navigation Bar */}
       <Navbar />
 
@@ -335,47 +325,48 @@ export default function App() {
         <main className="relative">
           {sectionsLayout
             .filter((sec: any) => sec.visible !== false)
-            .map((sec: any) => {
+            .map((sec: any, index: number) => {
+              const computedZIndex = (index + 1) * 10;
               switch (sec.id) {
                 case "hero":
                   return (
-                    <ScrollSection key="hero" zIndex={sec.zIndex} effect={sec.effect}>
+                    <ScrollSection key="hero" zIndex={computedZIndex} effect={sec.effect}>
                       <Hero />
                     </ScrollSection>
                   );
                 case "about":
                   return (
-                    <ScrollSection key="about" zIndex={sec.zIndex} effect={sec.effect}>
+                    <ScrollSection key="about" zIndex={computedZIndex} effect={sec.effect}>
                       <About />
                     </ScrollSection>
                   );
                 case "classes-events":
                   return (
-                    <ScrollSection key="classes-events" zIndex={sec.zIndex} effect={sec.effect}>
+                    <ScrollSection key="classes-events" zIndex={computedZIndex} effect={sec.effect}>
                       <ClassesEvents onSelectClass={handleSelectClass} />
                     </ScrollSection>
                   );
                 case "media":
                   return (
-                    <ScrollSection key="media" zIndex={sec.zIndex} effect={sec.effect}>
+                    <ScrollSection key="media" zIndex={computedZIndex} effect={sec.effect}>
                       <Media />
                     </ScrollSection>
                   );
                 case "news":
                   return (
-                    <ScrollSection key="news" zIndex={sec.zIndex} effect={sec.effect}>
+                    <ScrollSection key="news" zIndex={computedZIndex} effect={sec.effect}>
                       <News />
                     </ScrollSection>
                   );
                 case "hainan":
                   return (
-                    <ScrollSection key="hainan" zIndex={sec.zIndex} effect={sec.effect}>
+                    <ScrollSection key="hainan" zIndex={computedZIndex} effect={sec.effect}>
                       <HainanMarathon />
                     </ScrollSection>
                   );
                 case "contact":
                   return (
-                    <ScrollSection key="contact" zIndex={sec.zIndex} effect={sec.effect}>
+                    <ScrollSection key="contact" zIndex={computedZIndex} effect={sec.effect}>
                       <Contact selectedClass={selectedClass} />
                     </ScrollSection>
                   );
@@ -389,7 +380,7 @@ export default function App() {
       )}
 
       {/* Footer Branding Area */}
-      <div className="relative z-50">
+      <div className="relative z-[100]">
         <Footer />
       </div>
     </div>

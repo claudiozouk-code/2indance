@@ -173,7 +173,7 @@ export default function Hero() {
               variants={titleContainerVariants}
               initial="hidden"
               animate="visible"
-              className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-[58px] font-bold tracking-tight leading-[1.1] text-[#fff6da] uppercase flex flex-col items-center lg:items-start"
+              className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-[58px] font-bold tracking-tight leading-[1.1] text-[#fff6da] uppercase flex flex-col items-center lg:items-start title-emboss"
               style={{ 
                 perspective: "1000px",
                 textShadow: "0 6px 16px rgba(0,0,0,0.4)"

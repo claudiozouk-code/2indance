@@ -82,7 +82,7 @@ export default function ClassesEvents({ onSelectClass }: ClassesEventsProps) {
               Classes & Events
             </span>
           </div>
-          <h2 className="font-display text-3.5xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 text-[#fff6da] uppercase">
+          <h2 className="font-display text-3.5xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 text-[#fff6da] uppercase title-emboss">
             Start Your Dance Journey
           </h2>
           <p className="font-sans text-sm sm:text-base text-[#fff6da]/80 font-light">
@@ -166,7 +166,7 @@ export default function ClassesEvents({ onSelectClass }: ClassesEventsProps) {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.05 }}
-                      className="bg-[#2a2d29]/60 border border-[#9bb08a]/15 hover:border-[#f6c86b]/40 rounded-2xl p-6 transition-all duration-300 grid grid-cols-1 md:grid-cols-12 gap-6 items-center shadow-md backdrop-blur-sm"
+                      className="bg-[#2a2d29]/80 border border-[#f6c86b]/25 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-center shadow-md backdrop-blur-sm neon-card-hover"
                     >
                       {/* Day & Time Column */}
                       <div className="md:col-span-3 border-b md:border-b-0 md:border-r border-[#9bb08a]/10 pb-4 md:pb-0 md:pr-6 space-y-1">
@@ -243,7 +243,7 @@ export default function ClassesEvents({ onSelectClass }: ClassesEventsProps) {
                 {events.map((event) => (
                   <div
                     key={event.id}
-                    className="bg-[#2a2d29]/80 border border-[#9bb08a]/20 rounded-3xl overflow-hidden shadow-xl hover:border-[#f6c86b]/30 transition-all duration-300 flex flex-col group"
+                    className="bg-[#2a2d29]/90 border border-[#f6c86b]/30 rounded-3xl overflow-hidden shadow-xl neon-card-hover flex flex-col group"
                   >
                     {/* Header Image */}
                     <div className="h-56 relative overflow-hidden">
@@ -317,7 +317,7 @@ export default function ClassesEvents({ onSelectClass }: ClassesEventsProps) {
                 {danceStyles.map((style) => (
                   <div
                     key={style.id}
-                    className="bg-[#2a2d29]/40 border border-[#9bb08a]/15 rounded-3xl p-6 md:p-8 hover:bg-[#2a2d29]/60 transition-all duration-300 flex flex-col sm:flex-row gap-6 shadow-sm"
+                    className="bg-[#2a2d29]/80 border border-[#f6c86b]/30 rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row gap-6 shadow-md neon-card-hover"
                   >
                     {/* Style Thumbnail */}
                     <div className="sm:w-1/3 h-48 sm:h-auto rounded-2xl overflow-hidden relative">

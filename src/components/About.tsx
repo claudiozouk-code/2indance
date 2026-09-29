@@ -57,7 +57,7 @@ export default function About() {
               {content.title}
             </span>
           </div>
-          <h2 className="font-display text-3.5xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 text-[#3b3f3a] uppercase">
+          <h2 className="font-display text-3.5xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 text-[#3b3f3a] uppercase title-emboss-darktext">
             Meet Our School
           </h2>
           <p className="font-sans text-sm sm:text-base text-[#3b3f3a]/70 font-light max-w-xl mx-auto">
@@ -122,7 +122,7 @@ export default function About() {
             {content.stats?.map((stat, idx) => (
               <div
                 key={idx}
-                className="bg-[#ffe6a6]/40 border border-[#9bb08a]/10 p-6 rounded-2xl shadow-sm text-center flex flex-col justify-center items-center group hover:bg-[#ffe6a6]/60 transition-colors duration-200"
+                className="bg-[#ffe6a6]/40 border border-[#f6c86b]/30 shadow-sm text-center flex flex-col justify-center items-center group rounded-2xl p-6 neon-card-hover"
               >
                 <span className="font-display text-4.5xl font-extrabold text-[#3b3f3a]">
                   {stat.num}
@@ -181,7 +181,7 @@ export default function About() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.1 }}
                   transition={{ duration: 0.35, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                  className="bg-white/95 border border-[#9bb08a]/25 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col justify-between"
+                  className="bg-white/95 border border-[#f6c86b]/40 rounded-3xl overflow-hidden shadow-md neon-card-hover flex flex-col justify-between"
                 >
                   <div>
                     {/* Top Hero Image Banner */}
